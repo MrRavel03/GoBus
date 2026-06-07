@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil - GoBus CR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    html { font-family: 'Inter', sans-serif; }
+    body { background-color: #f1f5f9; } /* slate-100 */
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- HEADER (Modificado para usuario logueado) -->
+  <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        
+        <a href="index.html" class="flex items-center space-x-2">
+          <div class="bg-white p-1.5 rounded-lg"><i data-lucide="bus" class="h-6 w-6 text-blue-700"></i></div>
+          <span class="font-bold text-xl tracking-tight hidden sm:block">GoBus CR</span>
+        </a>
+
+        <nav class="hidden md:flex space-x-8">
+          <a href="index.html" class="text-blue-100 hover:text-white text-sm font-medium">Inicio</a>
+          <a href="rutas.html" class="text-blue-100 hover:text-white text-sm font-medium">Consultar Rutas</a>
+        </nav>
+
+        <!-- Menú de Usuario Logueado -->
+        <div class="flex items-center space-x-4">
+          <button class="text-blue-200 hover:text-white relative">
+            <i data-lucide="bell" class="h-5 w-5"></i>
+            <span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span></span>
+          </button>
+          
+          <div class="flex items-center gap-2 bg-blue-800 py-1.5 px-3 rounded-full border border-blue-600 cursor-pointer hover:bg-blue-900 transition-colors">
+            <div class="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center font-bold text-xs">JP</div>
+            <span class="text-sm font-medium hidden sm:block">Juan Pérez</span>
+            <i data-lucide="chevron-down" class="h-4 w-4 text-blue-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <div class="flex flex-col md:flex-row gap-8">
+      
+      <!-- Menú Lateral del Perfil -->
+      <aside class="w-full md:w-64 flex-shrink-0">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-6 text-center border-b border-slate-100">
+            <div class="h-20 w-20 mx-auto rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-2xl mb-3">
+              JP
+            </div>
+            <h2 class="font-bold text-slate-900 text-lg">Juan Pérez</h2>
+            <p class="text-sm text-slate-500">juan@correo.com</p>
+          </div>
+          
+          <nav class="p-2 space-y-1">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg font-medium">
+              <i data-lucide="bookmark" class="h-5 w-5"></i> Mis Rutas Guardadas
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
+              <i data-lucide="user" class="h-5 w-5 text-slate-400"></i> Datos Personales
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
+              <i data-lucide="settings" class="h-5 w-5 text-slate-400"></i> Preferencias
+            </a>
+            <div class="border-t border-slate-100 my-2"></div>
+            <a href="index.html" class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors">
+              <i data-lucide="log-out" class="h-5 w-5 text-red-400"></i> Cerrar Sesión
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Contenido Principal: Rutas Guardadas -->
+      <div class="flex-1 space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Mis Rutas Guardadas</h1>
+          <p class="text-slate-600 mt-1">Acceso rápido a los horarios que consultas frecuentemente.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          
+          <!-- Tarjeta de Ruta Guardada 1 -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 relative group">
+            <button class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors" title="Eliminar de guardados">
+              <i data-lucide="trash-2" class="h-5 w-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-2 mb-3">
+              <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">Favorito</span>
+            </div>
+            
+            <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+              San José <i data-lucide="arrow-right" class="h-4 w-4 text-slate-400"></i> Liberia
+            </h3>
+            <p class="text-sm text-slate-500 mb-4">Pulmitan de Liberia</p>
+            
+            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+              <div class="text-lg font-bold text-slate-900">₡4,150</div>
+              <a href="detalle-ruta.html" class="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                Ver horarios <i data-lucide="chevron-right" class="h-4 w-4"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Tarjeta de Ruta Guardada 2 -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 relative group">
+            <button class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors" title="Eliminar de guardados">
+              <i data-lucide="trash-2" class="h-5 w-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-2 mb-3">
+              <span class="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded">Trabajo</span>
+            </div>
+            
+            <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+              Heredia <i data-lucide="arrow-right" class="h-4 w-4 text-slate-400"></i> San José
+            </h3>
+            <p class="text-sm text-slate-500 mb-4">Microbuses Rápidos Heredianos</p>
+            
+            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+              <div class="text-lg font-bold text-slate-900">₡520</div>
+              <a href="#" class="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                Ver horarios <i data-lucide="chevron-right" class="h-4 w-4"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Tarjeta para Añadir Nueva -->
+          <a href="rutas.html" class="flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-5 text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-colors min-h-[160px]">
+            <i data-lucide="plus-circle" class="h-8 w-8 mb-2 text-slate-400 group-hover:text-blue-500"></i>
+            <span class="font-medium text-sm">Buscar nueva ruta</span>
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

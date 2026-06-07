@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle de Ruta - GoBus CR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    html { font-family: 'Inter', sans-serif; }
+    body { background-color: #f8fafc; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <a href="index.html" class="flex items-center space-x-2">
+          <div class="bg-white p-1.5 rounded-lg"><i data-lucide="bus" class="h-6 w-6 text-blue-700"></i></div>
+          <span class="font-bold text-xl tracking-tight">GoBus CR</span>
+        </a>
+        <div class="hidden md:flex items-center space-x-4">
+          <a href="rutas.html" class="text-blue-200 hover:text-white text-sm font-medium mr-4">Volver a rutas</a>
+          <a href="login.html" class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-500 transition-colors">Ingresar</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <!-- Breadcrumb -->
+    <nav class="text-sm text-slate-500 mb-6 flex items-center gap-2">
+      <a href="index.html" class="hover:text-blue-600">Inicio</a>
+      <i data-lucide="chevron-right" class="h-4 w-4"></i>
+      <a href="rutas.html" class="hover:text-blue-600">Rutas</a>
+      <i data-lucide="chevron-right" class="h-4 w-4"></i>
+      <span class="text-slate-800 font-medium">San José a Liberia</span>
+    </nav>
+
+    <!-- Encabezado de Ruta -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded-full border border-green-200">Servicio Directo</span>
+          <span class="text-sm text-slate-500 font-medium"><i data-lucide="building" class="inline h-4 w-4 mr-1"></i>Pulmitan de Liberia</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 flex items-center flex-wrap gap-2">
+          San José <i data-lucide="arrow-right" class="h-6 w-6 text-slate-400"></i> Liberia
+        </h1>
+      </div>
+      <div class="flex gap-2">
+        <button class="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium transition-colors">
+          <i data-lucide="bookmark" class="h-4 w-4"></i> Guardar
+        </button>
+        <button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+          <i data-lucide="share-2" class="h-4 w-4"></i> Compartir
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenido Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Columna Izquierda (Mapa e Itinerario) -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Mapa (Simulado con imagen) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-4 border-b border-slate-100 bg-slate-50">
+            <h2 class="font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="map" class="h-5 w-5 text-blue-600"></i> Recorrido
+            </h2>
+          </div>
+          <div class="h-64 bg-slate-200 relative">
+            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Mapa" class="w-full h-full object-cover">
+            <!-- Overlay simulando ruta -->
+            <div class="absolute inset-0 bg-blue-900/20"></div>
+          </div>
+        </div>
+
+        <!-- Paradas (Timeline) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h2 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <i data-lucide="map-pin" class="h-5 w-5 text-blue-600"></i> Terminales y Paradas
+          </h2>
+          
+          <div class="relative border-l-2 border-slate-200 ml-3 space-y-8">
+            <!-- Origen -->
+            <div class="relative pl-6">
+              <div class="absolute -left-2 top-1 h-4 w-4 rounded-full bg-blue-600 border-4 border-white shadow"></div>
+              <h3 class="font-bold text-slate-900">Terminal 7-10 (San José)</h3>
+              <p class="text-sm text-slate-500 mt-1">Paso de la Vaca, San José centro.</p>
+            </div>
+            <!-- Parada intermedia (gris) -->
+            <div class="relative pl-6">
+              <div class="absolute -left-1.5 top-1 h-3 w-3 rounded-full bg-slate-300 border-2 border-white"></div>
+              <h3 class="font-medium text-slate-700">Parada Cruce de Barranca</h3>
+              <p class="text-sm text-slate-500 mt-1">Puntarenas (Parada breve de 15 min)</p>
+            </div>
+            <!-- Destino -->
+            <div class="relative pl-6">
+              <div class="absolute -left-2 top-1 h-4 w-4 rounded-full bg-orange-500 border-4 border-white shadow"></div>
+              <h3 class="font-bold text-slate-900">Terminal Municipal de Liberia</h3>
+              <p class="text-sm text-slate-500 mt-1">Centro de Liberia, Guanacaste.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha (Tarifas y Horarios) -->
+      <div class="space-y-6">
+        
+        <!-- Tarjeta de Tarifa -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center">
+          <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Tarifa Regular</h3>
+          <div class="text-4xl font-extrabold text-slate-900 mb-4">₡4,150</div>
+          <p class="text-xs text-slate-400 mb-6">Adulto mayor: ₡3,100 (Mostrando cédula dorada)</p>
+          <button class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md">
+            Comprar Tiquete Externo
+          </button>
+        </div>
+
+        <!-- Tarjeta de Horarios -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-4 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
+            <h3 class="font-bold text-blue-900 flex items-center gap-2">
+              <i data-lucide="calendar-clock" class="h-5 w-5"></i> Horarios
+            </h3>
+            <span class="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded">Lunes a Domingo</span>
+          </div>
+          
+          <ul class="divide-y divide-slate-100">
+            <li class="p-4 flex justify-between items-center hover:bg-slate-50 transition-colors">
+              <div class="font-medium text-slate-900">06:00 AM</div>
+              <div class="text-sm text-slate-500">Directo</div>
+            </li>
+            <li class="p-4 flex justify-between items-center hover:bg-slate-50 transition-colors">
+              <div class="font-medium text-slate-900">08:00 AM</div>
+              <div class="text-sm text-slate-500">Regular</div>
+            </li>
+            <li class="p-4 flex justify-between items-center hover:bg-slate-50 transition-colors bg-orange-50/50">
+              <div class="font-medium text-orange-700 flex items-center gap-2">
+                10:00 AM <span class="bg-orange-200 text-orange-800 text-[10px] px-1.5 rounded uppercase font-bold">Próximo</span>
+              </div>
+              <div class="text-sm text-orange-600 font-medium">Directo</div>
+            </li>
+            <li class="p-4 flex justify-between items-center hover:bg-slate-50 transition-colors">
+              <div class="font-medium text-slate-900">01:00 PM</div>
+              <div class="text-sm text-slate-500">Directo</div>
+            </li>
+            <li class="p-4 flex justify-between items-center hover:bg-slate-50 transition-colors">
+              <div class="font-medium text-slate-900">04:00 PM</div>
+              <div class="text-sm text-slate-500">Regular</div>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-auto">
+    <p>© 2026 GoBus Costa Rica.</p>
+  </footer>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

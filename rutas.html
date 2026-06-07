@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultar Rutas - GoBus CR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    html { font-family: 'Inter', sans-serif; }
+    body { -webkit-font-smoothing: antialiased; background-color: #f8fafc; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <a href="index.html" class="flex items-center space-x-2">
+          <div class="bg-white p-1.5 rounded-lg"><i data-lucide="bus" class="h-6 w-6 text-blue-700"></i></div>
+          <span class="font-bold text-xl tracking-tight">GoBus CR</span>
+        </a>
+        <nav class="hidden md:flex space-x-8">
+          <a href="index.html" class="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-blue-600 hover:text-white">
+            <i data-lucide="bus" class="h-4 w-4"></i><span>Inicio</span>
+          </a>
+          <a href="rutas.html" class="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium bg-blue-800 text-white">
+            <i data-lucide="map" class="h-4 w-4"></i><span>Consultar Rutas</span>
+          </a>
+        </nav>
+        <div class="hidden md:flex items-center space-x-4">
+          <a href="login.html" class="flex items-center space-x-1 px-4 py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-500 border border-blue-500 transition-colors">
+            <i data-lucide="log-in" class="h-4 w-4"></i><span>Ingresar</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <!-- Barra de Búsqueda Superior -->
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row gap-4">
+      <div class="flex-1 flex border border-slate-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+        <span class="p-3 bg-slate-50 text-slate-500 border-r border-slate-300"><i data-lucide="map-pin" class="h-5 w-5"></i></span>
+        <input type="text" value="San José" class="w-full p-3 outline-none" placeholder="Origen">
+      </div>
+      <div class="flex-1 flex border border-slate-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+        <span class="p-3 bg-slate-50 text-slate-500 border-r border-slate-300"><i data-lucide="map" class="h-5 w-5"></i></span>
+        <input type="text" value="Liberia" class="w-full p-3 outline-none" placeholder="Destino">
+      </div>
+      <button class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors">
+        <i data-lucide="search" class="h-5 w-5"></i> Actualizar
+      </button>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-8">
+      
+      <!-- Panel de Filtros (Sidebar) -->
+      <aside class="w-full md:w-64 flex-shrink-0 space-y-6">
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="h-5 w-5 text-blue-600"></i> Filtros
+          </h3>
+          
+          <!-- Filtro Empresa -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-sm text-slate-700 mb-3">Empresa</h4>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="rounded text-blue-600 border-slate-300" checked>
+                <span class="text-sm text-slate-600">Pulmitan de Liberia</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="rounded text-blue-600 border-slate-300">
+                <span class="text-sm text-slate-600">Tracopa</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Filtro Comodidades -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-sm text-slate-700 mb-3">Comodidades</h4>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="rounded text-blue-600 border-slate-300">
+                <span class="text-sm text-slate-600">Aire Acondicionado</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="rounded text-blue-600 border-slate-300">
+                <span class="text-sm text-slate-600">Rampa (Ley 7600)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Lista de Resultados -->
+      <div class="flex-1 space-y-4">
+        <h2 class="text-xl font-bold text-slate-800 mb-4">3 rutas encontradas</h2>
+
+        <!-- Ruta Item 1 -->
+        <a href="detalle-ruta.html" class="block bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer">
+          <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">Directo</span>
+                <span class="text-sm text-slate-500">Pulmitan de Liberia</span>
+              </div>
+              <h3 class="font-bold text-lg text-slate-900">San José <i data-lucide="arrow-right" class="inline h-4 w-4 text-slate-400 mx-1"></i> Liberia</h3>
+              <div class="flex items-center gap-4 mt-2 text-sm text-slate-600">
+                <span class="flex items-center gap-1"><i data-lucide="clock" class="h-4 w-4"></i> 4h 00m</span>
+                <span class="flex items-center gap-1 text-blue-600" title="Aire Acondicionado"><i data-lucide="wind" class="h-4 w-4"></i> A/C</span>
+              </div>
+            </div>
+            <div class="text-left md:text-right flex flex-row md:flex-col justify-between items-center md:items-end">
+              <div class="text-2xl font-bold text-slate-900">₡4,150</div>
+              <button class="mt-2 bg-blue-50 text-blue-700 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                Ver detalle
+              </button>
+            </div>
+          </div>
+        </a>
+
+        <!-- Ruta Item 2 -->
+        <a href="detalle-ruta.html" class="block bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer">
+          <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded">Regular</span>
+                <span class="text-sm text-slate-500">Pulmitan de Liberia</span>
+              </div>
+              <h3 class="font-bold text-lg text-slate-900">San José <i data-lucide="arrow-right" class="inline h-4 w-4 text-slate-400 mx-1"></i> Liberia</h3>
+              <div class="flex items-center gap-4 mt-2 text-sm text-slate-600">
+                <span class="flex items-center gap-1"><i data-lucide="clock" class="h-4 w-4"></i> 5h 30m</span>
+                <span class="text-xs text-slate-400 border border-slate-200 px-2 rounded">Hace paradas</span>
+              </div>
+            </div>
+            <div class="text-left md:text-right flex flex-row md:flex-col justify-between items-center md:items-end">
+              <div class="text-2xl font-bold text-slate-900">₡3,800</div>
+              <button class="mt-2 bg-blue-50 text-blue-700 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                Ver detalle
+              </button>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>
