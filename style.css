@@ -1,0 +1,40 @@
+html {
+  /* Activa el desplazamiento suave al hacer clic en enlaces internos */
+  scroll-behavior: smooth;
+  /* Aplica la fuente Inter a todo el proyecto */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  /* Evita que el contenido salte cuando aparece la barra de scroll */
+  overflow-y: scroll;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 3. Personalización de la barra de desplazamiento (Scrollbar) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9; /* Color de fondo (slate-100) */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* Color de la barra (slate-300) */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* Color al pasar el mouse (slate-400) */
+}
+
+/* 4. Utilidades extras (Por si las necesitas luego) */
+/* Clase para truncar texto a 2 líneas (útil para descripciones de rutas) */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}
