@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* --- ESTILOS GENERALES --- */
+/* ==========================================
+   1. ESTILOS GENERALES Y RESET
+   ========================================== */
 body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -12,19 +14,84 @@ body {
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+
+/* ==========================================
+   2. UTILIDADES GENERALES
+   ========================================== */
 .rounded-xl { border-radius: 0.75rem !important; }
 .text-slate-500 { color: #64748b !important; }
 .text-slate-900 { color: #0f172a !important; }
 .bg-slate-50 { background-color: #f8fafc !important; }
 
-/* --- HEADER / NAVBAR --- */
-.navbar-custom { background-color: #1d4ed8; }
-.brand-icon-bg {
-  background-color: white; padding: 6px; border-radius: 8px; display: inline-flex;
-}
-.brand-icon-bg i { color: #1d4ed8; }
 
-/* --- INPUTS CON ICONOS (Login/Registro/Buscador) --- */
+/* ==========================================
+   3. HEADER / NAVBAR
+   ========================================== */
+/* Color de fondo principal de la barra */
+.navbar-custom {
+  background-color: #2563eb !important;
+}
+
+/* Contenedor del ícono del logo */
+.brand-icon-bg,
+.navbar-custom .logo-icon-bg {
+  width: 32px;
+  height: 32px;
+  background-color: #ffffff;
+  padding: 6px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* El ícono del bus dentro del logo */
+.brand-icon-bg i,
+.navbar-custom .logo-icon {
+  color: #2563eb;
+  width: 20px;
+  height: 20px;
+}
+
+/* Enlaces del menú y animaciones */
+.navbar-custom .nav-link {
+  transition: background-color 0.3s ease;
+}
+
+.navbar-custom .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-custom .nav-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Botón de ingresar (borde sutil) */
+.navbar-custom .btn-login {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Control de superposición para elementos fijos del header */
+.navbar-custom .z-nav-priority {
+  z-index: 20;
+}
+
+/* Centrado geométrico absoluto del menú en pantallas de escritorio */
+@media (min-width: 768px) {
+  .navbar-custom .navbar-center-absolute {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0 !important;
+    z-index: 10;
+  }
+}
+
+
+/* ==========================================
+   4. INPUTS CON ICONOS GLOBALES
+   ========================================== */
 .input-icon-wrapper { position: relative; }
 .input-icon-wrapper i {
   position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; z-index: 10;
@@ -32,27 +99,274 @@ body {
 .input-icon-wrapper .form-control { padding-left: 2.75rem; padding-top: 0.6rem; padding-bottom: 0.6rem; }
 .input-icon-wrapper .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25); }
 
-/* --- LOGIN Y REGISTRO --- */
-.auth-container { max-width: 450px; width: 100%; margin: 0 auto; }
-.auth-card {
-  background: white; border-radius: 1rem; border: 1px solid #f1f5f9;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+
+/* ==========================================
+   5. VISTAS DE AUTENTICACIÓN (Login, Registro, Recuperar)
+   ========================================== */
+/* Contenedor que centra vertical y horizontalmente el formulario */
+.auth-container,
+.auth-wrapper {
+  width: 100%;
+  margin: 0 auto;
+  min-height: calc(100vh - 72px - 150px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  padding: 2.5rem 1rem;
 }
+
+/* Tarjeta contenedora del formulario */
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón principal de los formularios */
+.btn-auth-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  padding: 0.75rem 1.2rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-auth-primary:hover {
+  background-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.btn-auth-primary:active {
+  transform: scale(0.98);
+}
+
+/* Ajustes de enfoque en los campos de texto */
+.auth-card .form-control:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Estilo para los íconos integrados en los inputs */
+.auth-card .input-group-text {
+  color: #64748b;
+  border-right: none;
+}
+
+.auth-card .form-control {
+  border-left: none;
+}
+
+/* Botón de retroceso */
 .back-btn { position: absolute; top: 1.5rem; left: 1.5rem; text-decoration: none; color: #64748b; }
 .back-btn:hover { color: #1d4ed8; }
 
-/* --- BOTÓN AÑADIR RUTA (Perfil) --- */
+
+/* ==========================================
+   6. COMPONENTES: PERFIL Y RUTAS
+   ========================================== */
+/* Botón Añadir Ruta (Perfil) */
 .btn-dashed {
   border: 2px dashed #cbd5e1; background-color: #f8fafc; border-radius: 0.75rem;
   transition: all 0.2s ease; cursor: pointer; text-decoration: none;
 }
 .btn-dashed:hover { border-color: #93c5fd; background-color: #eff6ff; color: #2563eb !important; }
 
-/* --- LINEA DE TIEMPO (Detalle Ruta) --- */
+/* Línea de tiempo (Detalle Ruta) */
 .timeline { border-left: 2px solid #e2e8f0; margin-left: 1rem; padding-left: 1.5rem; position: relative; }
 .timeline-item { position: relative; margin-bottom: 2rem; }
 .timeline-item:last-child { margin-bottom: 0; }
 .timeline-dot {
   position: absolute; left: -2.05rem; top: 0.25rem; width: 1rem; height: 1rem;
   border-radius: 50%; border: 3px solid white; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* ==========================================
+   7. COMPONENTES DE RUTAS (Listado y Detalle)
+   ========================================== */
+
+/* Tarjetas de listado de rutas */
+.route-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.route-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Badges suaves (Etiquetas) */
+.badge-soft-primary {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.5rem;
+}
+
+.badge-soft-success {
+  background-color: #ecfdf5;
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Botón circular con flecha */
+.btn-round-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.btn-round-arrow.primary {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+/* Efecto hover general para todas las tarjetas de rutas (Borde y sombra azul) */
+.route-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+}
+
+/* Botón circular base (Gris) */
+.btn-round-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.route-card:hover .btn-round-arrow {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+/* Pestañas personalizadas (Tabs en Detalle) */
+.custom-tabs {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.custom-tabs .nav-link {
+  color: #64748b;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  background: transparent;
+}
+
+.custom-tabs .nav-link:hover {
+  color: #0f172a;
+  border-bottom-color: #cbd5e1;
+}
+
+.custom-tabs .nav-link.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+/* Línea de tiempo visual (Origen a Destino) */
+.route-path {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.route-path::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background-color: #e2e8f0;
+}
+
+.route-dot {
+  position: absolute;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+}
+
+.route-dot.start {
+  top: 2px;
+}
+
+.route-dot.end {
+  bottom: 2px;
+  border-color: #3b82f6;
+}
+
+/* Línea de tiempo para Recorrido y Paradas */
+.detail-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.detail-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.45rem;
+  top: 0.5rem;
+  bottom: 2rem;
+  width: 2px;
+  background-color: #e2e8f0;
+}
+
+.detail-timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.detail-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.detail-timeline-dot {
+  position: absolute;
+  left: -2rem;
+  top: 0.1rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  z-index: 1;
+}
+
+.detail-timeline-dot.primary {
+  border-color: #3b82f6;
+  border-width: 3px;
+}
+
+.detail-timeline-dot.success {
+  border-color: #10b981;
+  border-width: 3px;
 }

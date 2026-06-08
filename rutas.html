@@ -1,126 +1,221 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consultar Rutas - GoBus CR</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <title>Consultar Rutas - GoBus</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Estilos personalizados -->
   <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="d-flex flex-column min-vh-100">
 
-<div id="header-container"></div>
+<body class="d-flex flex-column min-vh-100 bg-slate-50">
 
-  <main class="flex-grow-1 container-xl py-5">
-    
-    <div class="bg-white p-3 rounded-xl shadow-sm border mb-5">
-      <form class="row g-2 align-items-center">
-        <div class="col-md-5">
-          <div class="input-group">
-            <span class="input-group-text bg-light border-end-0"><i data-lucide="map-pin" class="text-muted" style="width: 20px;"></i></span>
-            <input type="text" class="form-control border-start-0 py-2 bg-light" value="San José">
-          </div>
-        </div>
-        <div class="col-md-5">
-          <div class="input-group">
-            <span class="input-group-text bg-light border-end-0"><i data-lucide="map" class="text-muted" style="width: 20px;"></i></span>
-            <input type="text" class="form-control border-start-0 py-2 bg-light" value="Liberia">
-          </div>
-        </div>
-        <div class="col-md-2">
-          <button type="button" class="btn btn-warning text-white w-100 py-2 fw-bold d-flex justify-content-center gap-2" style="background-color: #f97316; border-color: #f97316;">
-            <i data-lucide="search" style="width: 20px;"></i> Actualizar
-          </button>
-        </div>
-      </form>
-    </div>
+  <!-- Header dinámico -->
+  <div id="header-container"></div>
 
+  <main class="flex-grow-1 container-xl py-4 py-md-5">
     <div class="row g-4">
-      <aside class="col-md-3">
-        <div class="bg-white p-4 rounded-xl shadow-sm border">
+
+      <!-- Panel de Filtros (Izquierda) -->
+      <aside class="col-lg-3 d-none d-lg-block">
+        <div class="bg-white p-4 rounded-xl border">
           <h5 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
-            <i data-lucide="sliders-horizontal" class="text-primary" style="width:20px;"></i> Filtros
+            <i data-lucide="filter" style="width:20px;"></i> Filtros
           </h5>
+
+          <!-- Provincia -->
           <div class="mb-4">
-            <h6 class="fw-semibold small text-secondary mb-3">Empresa</h6>
+            <h6 class="fw-bold small text-dark mb-3">Provincia</h6>
             <div class="form-check mb-2">
-              <input class="form-check-input" type="checkbox" checked id="f1">
-              <label class="form-check-label small text-secondary cursor-pointer" for="f1">Pulmitan de Liberia</label>
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="p-sanjose">
+              <label class="form-check-label text-secondary small" for="p-sanjose">San José</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="p-alajuela">
+              <label class="form-check-label text-secondary small" for="p-alajuela">Alajuela</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="p-cartago">
+              <label class="form-check-label text-secondary small" for="p-cartago">Cartago</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="p-heredia">
+              <label class="form-check-label text-secondary small" for="p-heredia">Heredia</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="p-guanacaste">
+              <label class="form-check-label text-secondary small" for="p-guanacaste">Guanacaste</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="p-puntarenas">
+              <label class="form-check-label text-secondary small" for="p-puntarenas">Puntarenas</label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="f2">
-              <label class="form-check-label small text-secondary cursor-pointer" for="f2">Tracopa</label>
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="p-limon">
+              <label class="form-check-label text-secondary small" for="p-limon">Limón</label>
             </div>
           </div>
-          <div>
-            <h6 class="fw-semibold small text-secondary mb-3">Comodidades</h6>
+
+          <!-- Tipo de Servicio -->
+          <div class="mb-4">
+            <h6 class="fw-bold small text-dark mb-3">Tipo de Servicio</h6>
             <div class="form-check mb-2">
-              <input class="form-check-input" type="checkbox" id="f3">
-              <label class="form-check-label small text-secondary cursor-pointer" for="f3">Aire Acondicionado</label>
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="ts-urbano">
+              <label class="form-check-label text-secondary small" for="ts-urbano">Urbano</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked id="ts-interurbano">
+              <label class="form-check-label text-secondary small" for="ts-interurbano">Interurbano</label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="f4">
-              <label class="form-check-label small text-secondary cursor-pointer" for="f4">Rampa (Ley 7600)</label>
+              <input class="form-check-input bg-secondary border-secondary" type="checkbox" checked
+                id="ts-internacional">
+              <label class="form-check-label text-secondary small" for="ts-internacional">Internacional</label>
             </div>
           </div>
+
+          <button class="btn btn-light text-primary w-100 fw-medium" style="background-color: #eff6ff;">Limpiar
+            filtros</button>
         </div>
       </aside>
 
-      <div class="col-md-9">
-        <h4 class="fw-bold text-dark mb-4 fs-5">3 rutas encontradas</h4>
+      <!-- Contenido Principal (Derecha) -->
+      <div class="col-lg-9">
 
-        <a href="detalle-ruta.html" class="text-decoration-none">
-          <div class="card rounded-xl border mb-3 shadow-sm card-route p-2">
-            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-              <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <span class="badge bg-success bg-opacity-10 text-success border border-success">Directo</span>
-                  <span class="small text-secondary">Pulmitan de Liberia</span>
+        <!-- Buscador superior -->
+        <div class="bg-white rounded-xl border mb-4 px-3 py-2 d-flex align-items-center">
+          <i data-lucide="search" class="text-muted ms-2" style="width: 20px;"></i>
+          <input type="text" class="form-control border-0 shadow-none bg-transparent"
+            placeholder="Buscar por origen, destino o empresa...">
+        </div>
+
+        <!-- Tarjetas de Rutas -->
+        <div class="d-flex flex-column gap-3 mb-4">
+
+          <!-- Ruta 1 -->
+          <a href="detalle-ruta.html" class="route-card p-4">
+            <div class="row align-items-center">
+              <div class="col-8 col-md-9">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <span class="badge-soft-primary small">Urbano</span>
+                  <span class="text-secondary small fw-medium">• Lumaca</span>
                 </div>
-                <h5 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">San José <i data-lucide="arrow-right" class="text-muted" style="width:16px;"></i> Liberia</h5>
-                <div class="d-flex gap-3 small text-secondary mt-2">
-                  <span class="d-flex align-items-center gap-1"><i data-lucide="clock" style="width:16px;"></i> 4h 00m</span>
-                  <span class="d-flex align-items-center gap-1 text-primary"><i data-lucide="wind" style="width:16px;"></i> A/C</span>
+                <div class="route-path">
+                  <div class="route-dot start"></div>
+                  <h6 class="fw-bold text-dark mb-3">San José</h6>
+                  <div class="route-dot end"></div>
+                  <h6 class="fw-bold text-dark mb-0">Cartago</h6>
                 </div>
               </div>
-              <div class="text-md-end d-flex flex-row flex-md-column justify-content-between align-items-center align-items-md-end">
-                <div class="fs-4 fw-bold text-dark">₡4,150</div>
-                <button class="btn btn-light text-primary border-0 mt-md-2 fw-medium small">Ver detalle</button>
+              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
+                <span class="text-secondary small d-flex align-items-center gap-1 mb-2"><i data-lucide="clock"
+                    style="width:14px;"></i> Cada 10 min</span>
+                <span class="fs-4 fw-bolder text-dark mb-2">₡750</span>
+                <div class="btn-round-arrow"><i data-lucide="chevron-right" style="width: 20px;"></i></div>
               </div>
             </div>
-          </div>
-        </a>
+          </a>
 
-        <a href="detalle-ruta.html" class="text-decoration-none">
-          <div class="card rounded-xl border mb-3 shadow-sm card-route p-2">
-            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-              <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">Regular</span>
-                  <span class="small text-secondary">Pulmitan de Liberia</span>
+          <!-- Ruta 2 (Destacada azul) -->
+          <a href="detalle-ruta.html" class="route-card p-4">
+            <div class="row align-items-center">
+              <div class="col-8 col-md-9">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <span class="badge-soft-primary small">Urbano</span>
+                  <span class="text-secondary small fw-medium">• Rapiditos</span>
                 </div>
-                <h5 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">San José <i data-lucide="arrow-right" class="text-muted" style="width:16px;"></i> Liberia</h5>
-                <div class="d-flex gap-3 small text-secondary mt-2">
-                  <span class="d-flex align-items-center gap-1"><i data-lucide="clock" style="width:16px;"></i> 5h 30m</span>
-                  <span class="badge border text-secondary fw-normal">Hace paradas</span>
+                <div class="route-path">
+                  <div class="route-dot start"></div>
+                  <h6 class="fw-bold text-dark mb-3">San José</h6>
+                  <div class="route-dot end"></div>
+                  <h6 class="fw-bold text-dark mb-0">Heredia</h6>
                 </div>
               </div>
-              <div class="text-md-end d-flex flex-row flex-md-column justify-content-between align-items-center align-items-md-end">
-                <div class="fs-4 fw-bold text-dark">₡3,800</div>
-                <button class="btn btn-light text-primary border-0 mt-md-2 fw-medium small">Ver detalle</button>
+              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
+                <span class="text-secondary small d-flex align-items-center gap-1 mb-2"><i data-lucide="clock"
+                    style="width:14px;"></i> Cada 15 min</span>
+                <span class="fs-4 fw-bolder text-dark mb-2">₡520</span>
+                <div class="btn-round-arrow"><i data-lucide="chevron-right" style="width: 20px;"></i></div>
               </div>
             </div>
-          </div>
-        </a>
+          </a>
+
+          <!-- Ruta 3 -->
+          <a href="detalle-ruta.html" class="route-card p-4">
+            <div class="row align-items-center">
+              <div class="col-8 col-md-9">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <span class="badge-soft-primary small">Urbano</span>
+                  <span class="text-secondary small fw-medium">• Tuasa</span>
+                </div>
+                <div class="route-path">
+                  <div class="route-dot start"></div>
+                  <h6 class="fw-bold text-dark mb-3">San José</h6>
+                  <div class="route-dot end"></div>
+                  <h6 class="fw-bold text-dark mb-0">Alajuela</h6>
+                </div>
+              </div>
+              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
+                <span class="text-secondary small d-flex align-items-center gap-1 mb-2"><i data-lucide="clock"
+                    style="width:14px;"></i> Cada 5 min</span>
+                <span class="fs-4 fw-bolder text-dark mb-2">₡680</span>
+                <div class="btn-round-arrow"><i data-lucide="chevron-right" style="width: 20px;"></i></div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Ruta 4 -->
+          <a href="detalle-ruta.html" class="route-card p-4">
+            <div class="row align-items-center">
+              <div class="col-8 col-md-9">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <span class="badge-soft-primary small">Interurbano</span>
+                  <span class="text-secondary small fw-medium">• Pulmitan</span>
+                </div>
+                <div class="route-path">
+                  <div class="route-dot start"></div>
+                  <h6 class="fw-bold text-dark mb-3">San José</h6>
+                  <div class="route-dot end"></div>
+                  <h6 class="fw-bold text-dark mb-0">Liberia</h6>
+                </div>
+              </div>
+              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
+                <span class="text-secondary small d-flex align-items-center gap-1 mb-2"><i data-lucide="clock"
+                    style="width:14px;"></i> Cada 2 horas</span>
+                <span class="fs-4 fw-bolder text-dark mb-2">₡4,500</span>
+                <div class="btn-round-arrow"><i data-lucide="chevron-right" style="width: 20px;"></i></div>
+              </div>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Navegación de páginas">
+          <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link text-secondary border-0 bg-transparent" href="#">Ant</a></li>
+            <li class="page-item active"><a class="page-link rounded bg-primary border-0" href="#">1</a></li>
+            <li class="page-item"><a class="page-link text-secondary border-0 bg-transparent" href="#">2</a></li>
+            <li class="page-item"><a class="page-link text-secondary border-0 bg-transparent" href="#">3</a></li>
+            <li class="page-item"><a class="page-link text-secondary border-0 bg-transparent" href="#">Sig</a></li>
+          </ul>
+        </nav>
+
       </div>
     </div>
   </main>
 
-<div id="footer-container"></div>
+  <!-- Footer dinámico -->
+  <div id="footer-container"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/main.js"></script>
-
 </body>
+
 </html>

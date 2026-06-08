@@ -1,38 +1,39 @@
 <nav class="navbar navbar-expand-md navbar-dark navbar-custom shadow-sm sticky-top py-2">
-  <div class="container-xl">
-    <!-- Logo -->
-    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" href="index.html">
-      <div class="brand-icon-bg">
-        <i data-lucide="bus" style="width: 24px; height: 24px;"></i>
+  <div class="container-xl d-flex align-items-center position-relative">
+    
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4 m-0 z-nav-priority" href="index.html">
+      <div class="rounded d-flex align-items-center justify-content-center shadow-sm logo-icon-bg">
+        <i data-lucide="bus" class="logo-icon"></i>
       </div>
       <span>GoBus</span>
     </a>
-
-    <!-- Botón Menú Móvil -->
-    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+    
+    <button class="navbar-toggler border-0 z-nav-priority" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
       <i data-lucide="menu" class="text-white"></i>
     </button>
-
-    <!-- Navegación -->
+    
     <div class="collapse navbar-collapse" id="mobileMenu">
-      <ul class="navbar-nav me-auto mb-2 mb-md-0 ms-md-4 gap-md-2">
+      
+<ul class="navbar-nav navbar-center-absolute mb-2 mb-md-0 gap-md-2 justify-content-center text-center">
         <li class="nav-item">
-          <a class="nav-link active rounded px-3 d-flex align-items-center gap-1" style="background-color: rgba(255,255,255,0.1);" href="index.html">
-            <i data-lucide="bus" style="width: 16px; height: 16px;"></i> Inicio
+          <a class="nav-link rounded px-3 d-inline-flex align-items-center gap-1" href="index.html">
+            <i data-lucide="layout-grid" class="nav-icon"></i> Inicio
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link px-3 d-flex align-items-center gap-1" href="rutas.html">
-            <i data-lucide="map" style="width: 16px; height: 16px;"></i> Consultar Rutas
+          <a class="nav-link rounded px-3 d-inline-flex align-items-center gap-1" href="rutas.html">
+            <i data-lucide="map" class="nav-icon"></i> Consultar Rutas
           </a>
         </li>
       </ul>
-      <!-- Botones Desktop -->
-      <div class="d-flex mt-3 mt-md-0">
-        <a href="login.html" class="btn btn-outline-light d-flex align-items-center gap-2 w-100 justify-content-center">
-          <i data-lucide="log-in" style="width: 16px; height: 16px;"></i> Ingresar
+      
+      <div class="d-flex mt-3 mt-md-0 align-items-center gap-3 justify-content-md-end justify-content-center ms-auto z-nav-priority">
+        <span class="text-white opacity-75 small d-none d-md-inline">Admin</span>
+        <a href="login.html" class="btn btn-outline-light d-flex align-items-center gap-2 btn-login">
+          <i data-lucide="log-in" class="nav-icon"></i> Ingresar
         </a>
       </div>
+
     </div>
   </div>
 </nav>
