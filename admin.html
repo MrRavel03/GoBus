@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,  initial-scale=1.0">
+    <title>Administracion - GoBus</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+    <div id="header" class="container" ></div>
+
+    <main class="flex-grow-1 container-x1 py-5">
+      <div class="mb-4">
+      <h1 class="fw-bold text-dark mb-1">Panel de Administración</h1>
+      <p class="text-secondary mb-0">
+
+        Gestion de rutas, horarios, tarifas, usuarios y reportes.
+
+      </p>
+    </div>
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:48px; height:48px;">
+              <i data-lucide="bus" style="width:24px;"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold mb-0">12</h5>
+              <p class="small text-secondary mb-0">Rutas activas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width:48px; height:48px;">
+              <i data-lucide="users" style="width:24px;"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold mb-0">48</h5>
+              <p class="small text-secondary mb-0">Usuarios registrados</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width:48px; height:48px;">
+              <i data-lucide="alert-circle" style="width:24px;"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold mb-0">5</h5>
+              <p class="small text-secondary mb-0">Reportes pendientes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width:48px; height:48px;">
+              <i data-lucide="map-pin" style="width:24px;"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold mb-0">32</h5>
+              <p class="small text-secondary mb-0">Paradas registradas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="fw-bold mb-1">Gestión de rutas</h5>
+          <p class="small text-secondary mb-0">Administra rutas, empresas, horarios y tarifas.</p>
+        </div>
+        <button class="btn btn-primary rounded-pill d-flex align-items-center gap-2">
+          <i data-lucide="plus" style="width:18px;"></i>
+
+          Agregar ruta
+
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Ruta</th>
+              <th>Empresa</th>
+              <th>Tipo</th>
+              <th>Tarifa</th>
+              <th>Frecuencia</th>
+              <th>Estado</th>
+              <th class="text-end pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="ps-4 fw-medium">San José - Cartago</td>
+              <td>Lumaca</td>
+              <td>Urbano</td>
+              <td>₡1400</td>
+              <td>Cada 10 min</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Activa</span></td>
+              <td class="text-end pe-4">
+                <button class="btn btn-sm btn-light border me-1">Editar</button>
+                <button class="btn btn-sm btn-light border text-danger">Eliminar</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="ps-4 fw-medium">San José - Heredia</td>
+              <td>Busetas Heredianas</td>
+              <td>Urbano</td>
+              <td>₡720</td>
+              <td>Cada 5 min</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Activa</span></td>
+              <td class="text-end pe-4">
+                <button class="btn btn-sm btn-light border me-1">Editar</button>
+                <button class="btn btn-sm btn-light border text-danger">Eliminar</button>
+              </td>
+            </tr>
+            <tr>
+
+                <tr>
+                <td class="ps-4 fw-medium">San José - Alajuela</td>
+                <td>Tuasa</td>
+                <td>Urbano</td>
+                <td>₡680</td>
+                <td>Cada 10 min</td>
+                <td><span class="badge bg-success bg-opacity-10 text-success">Activa</span></td>
+                <td class="text-end pe-4">
+                    <button class="btn btn-sm btn-light border me-1">Editar</button>
+                    <button class="btn btn-sm btn-light border text-danger">Eliminar</button>
+                </td>
+                </tr>
+              <td class="ps-4 fw-medium">San José - Liberia</td>
+              <td>Pulmitan</td>
+              <td>Interurbano</td>
+              <td>₡4,500</td>
+              <td>Cada 2 horas</td>
+              <td><span class="badge bg-warning bg-opacity-10 text-warning">En revisión</span></td>
+              <td class="text-end pe-4">
+                <button class="btn btn-sm btn-light border me-1">Editar</button>
+                <button class="btn btn-sm btn-light border text-danger">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-header bg-white border-0 p-4">
+            <h5 class="fw-bold mb-1">Reportes recientes</h5>
+            <p class="small text-secondary mb-0">Problemas reportados por los usuarios.</p>
+          </div>
+          <div class="list-group list-group-flush">
+            <div class="list-group-item p-4">
+              <h6 class="fw-bold mb-1">Horario incorrecto</h6>
+              <p class="small text-secondary mb-1">Ruta San José - Cartago</p>
+              <span class="badge bg-warning bg-opacity-10 text-warning">Pendiente</span>
+            </div>
+            <div class="list-group-item p-4">
+              <h6 class="fw-bold mb-1">Tarifa desactualizada</h6>
+              <p class="small text-secondary mb-1">Ruta Heredia - San José</p>
+              <span class="badge bg-success bg-opacity-10 text-success">Revisado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-header bg-white border-0 p-4">
+            <h5 class="fw-bold mb-1">Usuarios recientes</h5>
+            <p class="small text-secondary mb-0">Últimas cuentas registradas en la plataforma.</p>
+          </div>
+          <div class="list-group list-group-flush">
+            <div class="list-group-item p-4 d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="fw-bold mb-1">Angelica Schlubeck</h6>
+                <p class="small text-secondary mb-0">angelica@correo.com</p>
+              </div>
+              <span class="badge bg-primary bg-opacity-10 text-primary">Usuario</span>
+            </div>
+            <div class="list-group-item p-4 d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="fw-bold mb-1">Gabriel Osorio</h6>
+                <p class="small text-secondary mb-0">Gabriel@correo.com</p>
+              </div>
+              <span class="badge bg-primary bg-opacity-10 text-primary">Usuario</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div id="footer-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>  
+
+
+        
