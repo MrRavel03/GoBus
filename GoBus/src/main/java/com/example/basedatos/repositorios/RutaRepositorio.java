@@ -1,6 +1,6 @@
-package com.example.BaseDatos.Repositorios;
+package com.example.basedatos.repositorios;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.example.BaseDatos.Tablas.Ruta;
+import com.example.basedatos.tablas.Ruta;
 
 public interface RutaRepositorio extends JpaRepository<Ruta, Long> {}

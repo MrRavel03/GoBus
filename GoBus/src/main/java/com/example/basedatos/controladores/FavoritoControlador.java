@@ -1,4 +1,4 @@
-package com.example.BaseDatos.Controladores;
+package com.example.basedatos.controladores;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.BaseDatos.Repositorios.FavoritoRepositorio;
-import com.example.BaseDatos.Tablas.Favorito;
+import com.example.basedatos.repositorios.FavoritoRepositorio;
+import com.example.basedatos.tablas.Favorito;
 import java.util.List;
 
 @RestController

@@ -1,4 +1,4 @@
-package com.example.BaseDatos.Controladores;
+package com.example.basedatos.controladores;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,27 +7,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.BaseDatos.Repositorios.ParadaRepositorio;
-import com.example.BaseDatos.Tablas.Parada;
+import com.example.basedatos.repositorios.HorarioRepositorio;
+import com.example.basedatos.tablas.Horario;
 import java.util.List;
 
-@RestController
-@RequestMapping("/paradas")
 
-public class ParadaControlador{
+@RestController
+@RequestMapping("/horarios")
+
+public class HorarioControlador{
     @Autowired
-    private ParadaRepositorio repositorioParada;
+    private HorarioRepositorio repositorioHorario;
 
     @GetMapping
-    public List <Parada> consultarParadas(){
-        return repositorioParada.findAll();
+    public List <Horario> listarRutas(){
+        return repositorioHorario.findAll();
     }
 
     @PostMapping
-    public Parada crearParadas(@RequestBody Parada parada){
-        return repositorioParada.save(parada);
+    public Horario crearHorarios(@RequestBody Horario horario){
+        return repositorioHorario.save(horario);
     }
 
 }
-
-

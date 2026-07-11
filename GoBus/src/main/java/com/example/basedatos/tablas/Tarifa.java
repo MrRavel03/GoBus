@@ -1,4 +1,6 @@
-package com.example.BaseDatos.Tablas;
+package com.example.basedatos.tablas;
+
+import java.math.BigDecimal;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,19 +11,18 @@ import jakarta.persistence.ManyToOne;
 
 @Entity
 
-
-public class Parada {
+public class Tarifa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     private Long id;
-    private String ubicacion;
+    private BigDecimal costo;
 
     public long getId() {return id;}
     public void setId(long id) {this.id = id;}
 
-    public String getUbicacion() {return ubicacion;}
-    public void setUbicacion(String ubicacion) {this.ubicacion = ubicacion;}
+    public BigDecimal getCosto() {return costo;}
+    public void setCosto(BigDecimal costo) {this.costo = costo;}
 
     @ManyToOne
     @JoinColumn(name = "id_ruta", nullable = false)

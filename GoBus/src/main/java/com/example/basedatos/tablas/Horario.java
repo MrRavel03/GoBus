@@ -1,4 +1,4 @@
-package com.example.BaseDatos.Tablas;
+package com.example.basedatos.tablas;
 
 import java.time.LocalTime;
 

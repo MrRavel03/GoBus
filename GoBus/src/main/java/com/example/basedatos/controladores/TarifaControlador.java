@@ -1,4 +1,4 @@
-package com.example.BaseDatos.Controladores;
+package com.example.basedatos.controladores;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,27 +7,31 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.BaseDatos.Repositorios.RutaRepositorio;
-import com.example.BaseDatos.Tablas.Ruta;
-
+import com.example.basedatos.repositorios.TarifaRepositorio;
+import com.example.basedatos.tablas.Tarifa;
 import java.util.List;
 
-
 @RestController
-@RequestMapping("/rutas")
+@RequestMapping("/tarifas")
 
-public class RutaControlador {
+public class TarifaControlador{
     @Autowired
-    private RutaRepositorio repositorioRuta;
+    private TarifaRepositorio repositorioTarifa;
 
     @GetMapping
-    public List <Ruta> consultarRutas(){
-        return repositorioRuta.findAll();
+    public List <Tarifa> consultarTarifas(){
+        return repositorioTarifa.findAll();
     }
 
     @PostMapping
-    public Ruta crearRutas(@RequestBody Ruta ruta){
-        return repositorioRuta.save(ruta);
+    public Tarifa crearTarifas(@RequestBody Tarifa tarifa){
+        return repositorioTarifa.save(tarifa);
     }
 
 }
+
+
+
+
+
+

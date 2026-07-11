@@ -68,7 +68,7 @@ function cargarRutasDesdeBackend() {
   if (!contenedorRutas) {
     return;
   }
-  fetch("api/rutas.php")
+  fetch("/api/rutas")
     .then(function (response) {
       return response.json();
     })
@@ -130,7 +130,7 @@ function cargarDetalleRutaDesdeBackend() {
   const parametros = new URLSearchParams(window.location.search);
   const idRuta = parametros.get("id") || 1;
 
-  fetch(`api/detalle-ruta.php?id=${idRuta}`)
+  tablasfetch(`/api/rutas/${idRuta}`)
     .then(function (response) {
       return response.json();
     })
