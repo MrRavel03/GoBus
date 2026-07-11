@@ -24,7 +24,7 @@ public class RutaControlador {
 
     // Reemplaza a detalle-ruta.php?id=X
     @GetMapping("/{id}")
-    public ResponseEntity<Ruta> obtenerDetalleRuta(@PathVariable Integer id) {
+    public ResponseEntity<Ruta> obtenerDetalleRuta(@PathVariable Long id) {
         Optional<Ruta> ruta = rutaRepositorio.findById(id);
         
         return ruta.map(ResponseEntity::ok)
