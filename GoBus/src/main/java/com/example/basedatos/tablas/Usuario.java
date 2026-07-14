@@ -24,6 +24,8 @@ public class Usuario {
     @Column(name = "userPassword")
     private String userPassword;
 
+    private String rol;
+
 
     public Long getId() {return id;}
     public void setId(Long id) {this.id = id;}
@@ -37,10 +39,17 @@ public class Usuario {
     public String getUserPassword() {return userPassword;}
     public void setUserPassword(String userPassword) {this.userPassword = userPassword;}
 
+     public String getRol() {return rol;}
+     public void setRol(String rol) {this.rol = rol;}
+
+
+
     @OneToMany(mappedBy = "usuario")
     private List<Favorito> favoritos;
     public List<Favorito> getFavoritos() {return favoritos;}
     public void setFavoritos(List<Favorito> favoritos) {this.favoritos = favoritos;}
+
+   
 
     
     

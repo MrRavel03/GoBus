@@ -9,6 +9,7 @@ async function cargarPlantillas() {
     // 2. Cargar el Footer
     const respuestaFooter = await fetch('plantillas/footer.html');
     const htmlFooter = await respuestaFooter.text();
+
     // Verificamos si la página tiene footer (el login quizás no lo necesite)
     if (document.getElementById('footer-container')) {
       document.getElementById('footer-container').innerHTML = htmlFooter;
@@ -17,13 +18,57 @@ async function cargarPlantillas() {
     // 3. Activar el menú correspondiente según la página actual
     marcarMenuActivo();
 
-    // 4. Inicializar los íconos de Lucide UNA sola vez al final
+    //4. Actualizar la interfaz segun el rol del usuario
+    actualizarHeaderInterfaz();
+
+    // 5. Inicializar los íconos de Lucide UNA sola vez al final
     lucide.createIcons();
 
   } catch (error) {
     console.error("Error cargando las plantillas:", error);
   }
 }
+
+function actualizarHeaderInterfaz(){
+  const loggeado= localStorage.getItem('loggeado')==='true';
+  const rol= localStorage.getItem('usuarioRol');
+
+  const linkAdmin= document.getElementById('link-admin-header');
+  const botonSesion= document.getElementById('btn-sesion-header');
+
+  if (loggeado){
+    if (linkAdmin){
+      linkAdmin.style.display=(rol==='ADMIN')?'inline':'none';
+    }
+
+    if (botonSesion){
+      botonSesion.innerHTML='<i data-lucide="log-out" class="nav-icon"></i> Salir';
+      botonSesion.href="#";
+
+      botonSesion.onclick = (e) => {
+        e.preventDefault();
+        cerrarSesion();
+      };
+    }
+    }else{
+      if (linkAdmin){
+      linkAdmin.style.display=(rol==='ADMIN')?'inline':'none';
+    }
+
+    if (botonSesion){
+      botonSesion.innerHTML='<i data-lucide="log-in" class="nav-icon"></i> Ingresar';
+      botonSesion.classList.replace('btn-outline-danger', 'btn-outline-light')
+      botonSesion.href="login.html";
+      botonSesion.onclick=null;
+    }
+    }
+
+    if (typeof lucide!=="undefined") lucide.createIcons();
+
+
+  }
+
+
 
 // Función para resaltar la página actual en el menú
 function marcarMenuActivo() {
@@ -52,15 +97,188 @@ function marcarMenuActivo() {
   });
 }
 
-// Ejecutar la función cuando el archivo cargue
-cargarPlantillas();
+//FUNCIONALIDADES DE USUARIO
+
+//Boton para mostrar la contrasena oculta
+function verContrasena(idBoton, idInput) {
+  const btn = document.querySelector(idBoton);
+  const input = document.querySelector(idInput);
+
+  if (btn && input) {
+    btn.addEventListener('click', function () {
+      const tipo = input.getAttribute('type') === 'password' ? 'text' : 'password';
+      input.setAttribute('type', tipo);
+
+      const icono = btn.querySelector('[data-lucide]');
+
+      if (icono) {
+        if (tipo == 'text') {
+          icono.setAttribute('data-lucide', 'eye');
+        } else {
+          icono.setAttribute('data-lucide', 'eye-off');
+        }
+        lucide.createIcons();
+      }
+    });
+  }
+
+}
 
 
+function crearCuenta(){
+  const formulario= document.getElementById('registroFormulario');
+  
+  if (formulario){
+    formulario.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    //Capturar los valores del formulario
+    const nombreInput=document.querySelector('input[placeholder="Tu nombre y apellidos"]').value;
+    const emailInput= document.getElementById('email').value;
+    const passwordInput= document.getElementById('password').value;
+
+    //Crear el objecto Json
+    const usuarioDatos ={
+      nombre: nombreInput,
+      correo: emailInput,
+      userPassword: passwordInput,
+    };
+
+    try{
+      //Peticion hacia el servidor
+      const respuesta= await fetch('http://localhost:8080/usuarios',{
+        method: 'POST',
+        headers:{
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(usuarioDatos)      
+      });
+
+      //Verificar si se pudo completar la accion correctamente
+
+      if (respuesta.ok){
+        Swal.fire({
+          title: 'Exito',
+          text: 'Usuario registrado exitosamente',
+          icon: 'success',
+          confirmButtonColor: '#0d6efd'
+        }).then(() => {
+          window.location.href="login.html";
+        });
+
+      }else{
+        Swal.fire({
+            title: 'Error en registro',
+            text: 'Error al registrar el usuario',
+            icon: 'error',
+            confirmButtonColor: '#fd0d0d'
+        });
+      }
+
+    }catch(error){
+      console.error("Error de conexion:",error)
+      Swal.fire({
+          title: 'Error de conexion',
+          text: 'No se pudo conectar con el servidor',
+          icon: 'error',
+          confirmButtonColor: '#cccbcb'
+        });
+      
+    }
+  });
+
+}
+}
+
+function iniciarSesion(){
+  const formulario= document.getElementById('loginFormulario');
+  
+  if (formulario){
+    formulario.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    //Recolectar datos
+    const loginDatos ={
+      correo: document.getElementById('email').value,
+      userPassword: document.getElementById('password').value,
+    };
+
+    try{
+      //Peticion hacia el servidor
+      const respuesta= await fetch('http://localhost:8080/usuarios/login',{
+        method: 'POST',
+        headers:{
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginDatos)      
+      });
+
+      //Verificar si se pudo completar la accion correctamente
+
+      if (respuesta.ok){
+        const usuario = await respuesta.json();
+
+        localStorage.setItem('usuarioNombre', usuario.nombre);
+        localStorage.setItem('usuarioRol', usuario.rol);
+        localStorage.setItem('loggeado', 'true');
+
+        Swal.fire({
+          title: '¡Bienvenido!',
+          text: 'Hola ' + usuario.nombre + ', bienvenido a GoBus',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+           timerProgressBar: true
+         }).then(() => {
+          window.location.href="index.html";
+         });
+
+      }else{
+        Swal.fire({
+          title: 'Error de acceso',
+          text: 'Correo o contraseña incorrectos',
+          icon: 'error',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+
+    }catch(error){
+      console.error("Error de conexion:",error)
+      Swal.fire({
+          title: 'Error de conexion',
+          text: 'No se pudo conectar con el servidor',
+          icon: 'error',
+          confirmButtonColor: '#cccbcb'
+        });
+    }
+  });
+
+}
+}
+
+function cerrarSesion(){
+    Swal.fire({
+      title:'¿Cerrar sesión?',
+      text: "¿Estás seguro de que deseas salir de GoBus?",
+      icon:'question',
+      showCancelButton: true,
+      confirmButtonColor: '#0d6efd',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar'
+      
+    }).then((resultado) => {
+      if (resultado.isConfirmed) {
+      localStorage.clear();
+      location.href = "index.html";
+    }
+  });
+
+}
+
+
+//RUTAS Y DETALLES
 //Angelica rutas
-
-document.addEventListener("DOMContentLoaded", function () {
-  cargarRutasDesdeBackend();
-});
 
 function cargarRutasDesdeBackend() {
   const contenedorRutas = document.querySelector(".route-card")?.parentElement;
@@ -117,10 +335,6 @@ function cargarRutasDesdeBackend() {
 }
 
 //Angelica actualizacion recorridos. 
-
-document.addEventListener("DOMContentLoaded", function () {
-  cargarDetalleRutaDesdeBackend();
-});
 function cargarDetalleRutaDesdeBackend() {
   const paginaActual = window.location.pathname;
 
@@ -130,7 +344,7 @@ function cargarDetalleRutaDesdeBackend() {
   const parametros = new URLSearchParams(window.location.search);
   const idRuta = parametros.get("id") || 1;
 
-  tablasfetch(`/api/rutas/${idRuta}`)
+  fetch(`/api/rutas/${idRuta}`)
     .then(function (response) {
       return response.json();
     })
@@ -141,6 +355,8 @@ function cargarDetalleRutaDesdeBackend() {
       console.error("Error al cargar el detalle de la ruta:", error);
     });
 }
+
+
 function actualizarDetalleRuta(ruta) {
   // Encabezado principal: San José -> Liberia
   const tituloRuta = document.querySelector("h1.fw-bolder");
@@ -234,3 +450,27 @@ function actualizarDetalleRuta(ruta) {
     lucide.createIcons();
   }
 }
+
+
+
+  //INICIALIACION
+  document.addEventListener("DOMContentLoaded", function () {
+
+    //Cargar header
+    cargarPlantillas();
+
+    //Registro
+    crearCuenta();
+
+    //Login
+    iniciarSesion();
+
+    //Boton contrasena
+    verContrasena('#togglePassword', '#password');
+
+    //Cargar datos de rutas
+    cargarRutasDesdeBackend();
+    cargarDetalleRutaDesdeBackend();
+
+
+});
