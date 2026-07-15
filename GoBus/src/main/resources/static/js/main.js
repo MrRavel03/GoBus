@@ -51,8 +51,9 @@ function actualizarHeaderInterfaz(){
       };
     }
     }else{
+
       if (linkAdmin){
-      linkAdmin.style.display=(rol==='ADMIN')?'inline':'none';
+      linkAdmin.style.display = 'none';
     }
 
     if (botonSesion){
