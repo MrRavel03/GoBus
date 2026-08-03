@@ -284,6 +284,18 @@ async function cargarUsuariosRecientes() {
     const respuesta= await fetch('http://localhost:8080/usuarios');
     const usuarios= await respuesta.json();
 
+    //En caso de que no haya usuarios registrados recientemente
+
+    if (usuarios.length===0){
+      contenedorUsuarios.innerHTML=`
+      <div class="text-center p-5 text-secondary">
+      <i data-lucide="users-2" class="mb-3 opacity-20" style="width: 48px; height: 48px;"></i>
+      <p class="small mb-0">No hay usuarios registrados todavía.</p>
+      </div>`;
+      lucide.createIcons();
+      return;
+    }
+
     let contenedorVacio='';
 
     //Cargar ultimos 3 o 5 usuarios recientemente creados
@@ -319,8 +331,8 @@ async function cargarUsuariosRecientes() {
 //RUTAS Y DETALLES
 //Angelica rutas
 
-function cargarRutasDesdeBackend() {
-  const contenedorRutas = document.querySelector(".route-card")?.parentElement;
+async function cargarRutasDesdeBackend() {
+  const contenedorRutas = document.getElementById('contenedorRutas');
 
   if (!contenedorRutas) {
     return;
@@ -490,25 +502,170 @@ function actualizarDetalleRuta(ruta) {
   }
 }
 
+//Funcion para mostrar rutas visualmente en el panel de admin
+async function cargarRutasPanelAdmin() {
+  const tablaAdmin = document.querySelector('#tabla-rutas-admin');
+  if (!tablaAdmin) return; //Verificar si la tabla existe
+
+  tablaAdmin.innerHTML = '<tr><td colspan="7" class="text-center">Actualizando...</td></tr>';
+
+  try {
+    const respuesta = await fetch("/api/rutas");
+    const rutas = await respuesta.json();
+
+    let filasHTML = "";
+
+    rutas.forEach(ruta => {
+      const badgeColor = ruta.estado === 'Activa' ? 'bg-success' : 'bg-warning'; //Si la ruta dice "Activa" se guarda como bg-success, si no es asi se guarda como bg-warning
+
+      //Inyecta esos valores a la base de datos
+      filasHTML += ` 
+      <tr class="border-bottom">
+      <td class="ps-4 py-3 fw-bold text-dark">${ruta.origen} - ${ruta.destino}</td>
+      <td class="py-3 text-secondary">${ruta.empresa}</td>
+      <td class="py-3 text-secondary">${ruta.tipo}</td>
+      <td class="py-3 fw-bolder text-dark">₡${(ruta.tarifa || 0).toLocaleString("es-CR")}</td>
+      <td class="py-3">${ruta.frecuencia || 'N/A'}</td>
+      <td class="py-3">
+      <span class="badge ${badgeColor} bg-opacity-10 ${badgeColor.replace('bg-', 'text-')} rounded-pill px-3">
+              ${ruta.estado || 'Activa'}
+      </span>
+      </td>
+      <td class="py-3 text-end pe-4">
+      <div class="d-flex gap-2 justify-content-end">
+      <button onclick="prepararEdicion(${ruta.id})" class="btn btn-sm btn-light border">Editar</button>
+      <button onclick="confirmarEliminar(${ruta.id})" class="btn btn-sm btn-outline-danger">Eliminar</button>
+      </div>
+      </td>
+       </tr>`;
+    });
+
+    //Coloca todo lo que esta acumulado en filasHTML y lo coloca en la tablaAdmin
+
+    tablaAdmin.innerHTML = filasHTML;
+
+    if (typeof lucide !== "undefined") lucide.createIcons(); //Volver a dibujar los iconos
+
+  } catch (error) {
+    console.error("Error al conectar con la API de rutas:", error); //Manejo de errores
+    tablaAdmin.innerHTML = '<tr><td colspan="7" class="text-danger text-center">Error al cargar datos</td></tr>';
+  }
+}
+
+async function guardarRuta(e) {
+  e.preventDefault();
+
+  //Recoleccion de datos de lo que se escribio en el modal
+
+  const datosRuta = {
+    id: document.getElementById('rutaID').value || null,
+    origen: document.getElementById('origen').value,
+    destino: document.getElementById('destino').value,
+    empresa: document.getElementById('empresa').value,
+    tarifa: parseFloat(document.getElementById('tarifa').value),
+    frecuencia: document.getElementById('frecuencia').value,
+    tipo: document.getElementById('tipo').value,
+    estado: document.getElementById('estado').value,
+  };
+
+  try {
+    const respuesta = await fetch("http://localhost:8080/api/rutas", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datosRuta)
+    });
+
+
+    if (respuesta.ok) {
+      Swal.fire('¡Éxito!', 'La ruta se guardó correctamente', 'success');
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalRuta'));
+      modal.hide();
+
+      //Volver a llamar a la funcion para que muestre la lista actualizada y la dibuje
+      cargarRutasPanelAdmin();
+    }
+  } catch (error) {
+    console.error("Error al guardar:", error);
+  }
+}
+
+async function confirmarEliminar(id){
+  const result= await Swal.fire({
+    title: '¿Eliminar ruta?',
+    text: "Esta acción no se puede deshacer",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (result.isConfirmed){
+    try{
+      const respuesta= await fetch (`/api/rutas/${id}`, { method: 'DELETE' });
+      if (respuesta.ok){
+        Swal.fire('Eliminada', 'La ruta ha sido borrada', 'success');
+        cargarRutasPanelAdmin();
+      }
+
+    }catch(error){
+       Swal.fire('Error', 'No se pudo eliminar', 'error');
+    }
+  }
+}
+
+async function prepararEdicion(id) {
+  try {
+    const respuesta = await fetch(`/api/rutas/${id}`);
+    const ruta = await respuesta.json();
+
+    document.getElementById('modalTitulo').innerText = "Editar ruta";
+    document.getElementById('rutaID').value = ruta.id;
+
+    document.getElementById('origen').value = ruta.origen ||"";
+    document.getElementById('destino').value = ruta.destino ||"";
+      document.getElementById('empresa').value = ruta.empresa ||"";
+    document.getElementById('tarifa').value = ruta.tarifa || 0;
+    document.getElementById('frecuencia').value = ruta.frecuencia ||"";
+    document.getElementById('tipo').value = ruta.tipo ||"Urbano";
+    document.getElementById('estado').value = ruta.estado ||"Activa";
+
+    const modalRuta = new bootstrap.Modal(document.getElementById('modalRuta'));
+    modalRuta.show();
+
+
+  } catch (error) {
+    console.error("Error al cargar datos para editar:", error);
+  }
+}
+
+function limpiarFormularioRuta(){
+    document.getElementById('modalTitulo').innerText="Agregar nueva ruta";
+    document.getElementById('formularioRuta').reset();
+    document.getElementById('rutaID').value="";
+}
 
 
   //INICIALIACION
   document.addEventListener("DOMContentLoaded", function () {
 
-    //Cargar header
+    //Cargar estructura visual
     cargarPlantillas();
 
-    //Registro
+    //Listeners de formularios
+    //Crear cuenta
     crearCuenta();
-
     //Login
     iniciarSesion();
-
     //Boton contrasena
     verContrasena('#togglePassword', '#password');
 
     //Cargar usuarios recientes en el panel de admin
     cargarUsuariosRecientes();
+
+    //Llenado de tabla para admin
+    cargarRutasPanelAdmin();
 
     //Cargar datos de rutas
     cargarRutasDesdeBackend();

@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 
@@ -19,6 +21,10 @@ public class Ruta {
     private String origen;
     private String destino;
     private String empresa;
+    private String tipo;
+    private Double tarifa;
+    private String frecuencia;
+    private String estado;
 
     public long getId() {return id;}
     public void setId(long id) {this.id = id;}
@@ -32,16 +38,33 @@ public class Ruta {
     public String getEmpresa() {return empresa;}
     public void setEmpresa(String empresa) {this.empresa = empresa;}
 
+
+    public String getTipo() {return tipo;}
+    public void setTipo(String tipo) {this.tipo = tipo;}
+
+    public Double getTarifa() {return tarifa;}
+    public void setTarifa(Double tarifa) {this.tarifa = tarifa;}
+
+    public String getFrecuencia() {return frecuencia;}
+    public void setFrecuencia(String frecuencia) {this.frecuencia = frecuencia;}
+
+    public String getEstado() {return estado;}
+    public void setEstado(String estado) {this.estado = estado;}
+
     @OneToMany(mappedBy = "ruta")
+    @JsonIgnore
     private List<Horario> horarios;
 
     @OneToMany(mappedBy = "ruta")
+    @JsonIgnore
     private List<Tarifa> tarifas;
 
     @OneToMany(mappedBy = "ruta")
+    @JsonIgnore
     private List<Parada> paradas;
 
     @OneToMany(mappedBy = "ruta")
+    @JsonIgnore
     private List<Favorito> favoritos;
 
     public List<Horario> getHorarios() {return horarios;}
