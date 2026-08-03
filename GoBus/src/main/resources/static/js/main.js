@@ -122,7 +122,6 @@ function verContrasena(idBoton, idInput) {
       }
     });
   }
-
 }
 
 
@@ -275,6 +274,45 @@ function cerrarSesion(){
     }
   });
 
+}
+
+async function cargarUsuariosRecientes() {
+  const contenedorUsuarios= document.getElementById('contenedor-usuarios-recientes')
+  if (!contenedorUsuarios) return;
+
+  try{
+    const respuesta= await fetch('http://localhost:8080/usuarios');
+    const usuarios= await respuesta.json();
+
+    let contenedorVacio='';
+
+    //Cargar ultimos 3 o 5 usuarios recientemente creados
+
+    const ultimosCincoUsuarios = [...usuarios].reverse().slice(0, 4);
+
+    ultimosCincoUsuarios.forEach(user => {
+      //Segun el rol del usuario la seccion dibuja al lado del usuario su rol si es admin o usuario
+      contenedorVacio += `
+      <div class="list-group-item p-4 d-flex justify-content-between align-items-center fila-usuario">
+
+      <div>
+        <h6 class="fw-bold mb-1">${user.nombre}</h6>
+        <p class="small text-secondary mb-0">${user.correo}</p>
+        </div>
+
+      <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">
+        ${user.rol === 'ADMIN' ? 'Admin' : 'Usuario'}
+        </span>
+        </div>
+        `;
+    });
+
+    contenedorUsuarios.innerHTML=contenedorVacio;
+
+  }catch(error){
+    console.error("Error al cargar los usuarios", error);
+  }
+  
 }
 
 
@@ -468,6 +506,9 @@ function actualizarDetalleRuta(ruta) {
 
     //Boton contrasena
     verContrasena('#togglePassword', '#password');
+
+    //Cargar usuarios recientes en el panel de admin
+    cargarUsuariosRecientes();
 
     //Cargar datos de rutas
     cargarRutasDesdeBackend();
