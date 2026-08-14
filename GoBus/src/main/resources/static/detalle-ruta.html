@@ -23,22 +23,31 @@
       <a href="rutas.html" class="text-secondary small text-decoration-none d-inline-flex align-items-center gap-1 mb-3">
         <i data-lucide="arrow-left" style="width: 14px;"></i> Volver a resultados
       </a>
-      
+
       <div class="d-flex justify-content-between align-items-start">
         <div>
           <div class="d-flex align-items-center gap-2 mb-2">
-            <span class="badge-soft-primary small">Interurbano</span>
-            <span class="text-primary small fw-medium">Transportes Lumaca S.A.</span>
+            <!--Espacio para el tipo (Urbano/Interurbano)-->
+            <span id="detalle-tipo-ruta" class="badge-soft-primary small"></span>
+
+            <!--Espacio para el encabezado del nombre de la empresa-->
+
+            <span id="detalle-empresa-encabezado" class="text-primary small fw-medium"></span>
           </div>
-          <h1 class="fw-bolder text-dark mb-0 d-flex align-items-center gap-2">
-            San José <i data-lucide="arrow-right" class="text-muted" style="width: 24px;"></i> Cartago
-          </h1>
+        
+
+      <!--Espacio para el encabezado de la ruta-->
+      <h1 class="fw-bolder text-dark mb-0 d-flex align-items-center gap-2" id="detalle-titulo-ruta">
+
+      </h1>
         </div>
+        
         <button class="btn btn-outline-secondary d-flex align-items-center gap-2 fw-medium rounded-3 px-3">
-          <i data-lucide="heart" style="width: 18px;"></i> Guardar
-        </button>
+        <i data-lucide="heart" style="width: 18px;"></i> Guardar
+      </button>
       </div>
     </div>
+
 
     <!-- Menú de Pestañas (Tabs) -->
     <ul class="nav custom-tabs mb-4" id="rutaTabs" role="tablist">
@@ -66,7 +75,7 @@
                 <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
                   <i data-lucide="clock" class="text-primary" style="width: 20px;"></i> Salidas programadas
                 </h5>
-                <span class="badge badge-soft-success">Servicio Activo</span>
+                <span id="badge-estado-servicio" class="badge">Servicio Activo</span>
               </div>
               <div class="table-responsive">
                 <table class="table table-borderless align-middle mb-0">
@@ -78,25 +87,7 @@
                       <th class="py-3 fw-semibold">Frecuencia</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr class="border-bottom">
-                      <td class="ps-4 py-3 fw-medium text-dark">Lunes a Viernes</td>
-                      <td class="py-3 text-secondary">04:00 AM</td>
-                      <td class="py-3 text-secondary">11:00 PM</td>
-                      <td class="py-3 text-dark small">Cada 5-10 min (hora pico)<br><span class="text-secondary">Cada 15 min (resto)</span></td>
-                    </tr>
-                    <tr class="border-bottom">
-                      <td class="ps-4 py-3 fw-medium text-dark">Sábados</td>
-                      <td class="py-3 text-secondary">04:30 AM</td>
-                      <td class="py-3 text-secondary">11:00 PM</td>
-                      <td class="py-3 text-dark small">Cada 15 min</td>
-                    </tr>
-                    <tr>
-                      <td class="ps-4 py-3 fw-medium text-dark">Domingos y Feriados</td>
-                      <td class="py-3 text-secondary">05:00 AM</td>
-                      <td class="py-3 text-secondary">10:00 PM</td>
-                      <td class="py-3 text-dark small">Cada 20-30 min</td>
-                    </tr>
+                  <tbody id="tabla-horarios-cuerpo">
                   </tbody>
                 </table>
               </div>
@@ -113,70 +104,22 @@
               <h5 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
                 <i data-lucide="bus" class="text-primary" style="width: 20px;"></i> Recorrido completo
               </h5>
-              <div class="detail-timeline mt-2 ms-2">
-                
-                <div class="detail-timeline-item">
-                  <div class="detail-timeline-dot primary"></div>
-                  <h6 class="fw-bold text-dark mb-1">Terminal San José</h6>
-                  <p class="small text-secondary mb-0">Av 10, Calle 5 y 7. Contiguo a la Iglesia de La Soledad.</p>
-                </div>
-                
-                <div class="detail-timeline-item">
-                  <div class="detail-timeline-dot"></div>
-                  <h6 class="fw-bold text-dark mb-1">San Pedro (Mall San Pedro)</h6>
-                  <p class="small text-secondary mb-0">Frente a la fuente de la Hispanidad.</p>
-                </div>
-                
-                <div class="detail-timeline-item">
-                  <div class="detail-timeline-dot"></div>
-                  <h6 class="fw-bold text-dark mb-1">Curridabat (Pinares)</h6>
-                  <p class="small text-secondary mb-0">Frente a Walmart Curridabat.</p>
-                </div>
-
-                <div class="detail-timeline-item">
-                  <div class="detail-timeline-dot"></div>
-                  <h6 class="fw-bold text-dark mb-1">Tres Ríos (Centro)</h6>
-                  <p class="small text-secondary mb-0">Parada principal costado norte del parque.</p>
-                </div>
-
-                <div class="detail-timeline-item">
-                  <div class="detail-timeline-dot success"></div>
-                  <h6 class="fw-bold text-dark mb-1">Terminal Cartago</h6>
-                  <p class="small text-secondary mb-0">Av 2, Calle 2 y 4. Centro de Cartago.</p>
-                </div>
-
+              <!--Espacio para la linea de tiempo-->
+              <div class="detail-timeline mt-2 ms-2" id="contenedor-recorrido"></div>
               </div>
             </div>
-          </div>
+          
 
           <!-- TAB 3: TARIFAS -->
           <div class="tab-pane fade" id="tarifas" role="tabpanel">
             <div class="card rounded-xl border shadow-sm p-0 overflow-hidden text-center">
-              <div class="p-5 border-bottom">
                 <span class="small text-secondary fw-bold text-uppercase tracking-wider">Tarifa Regular</span>
-                <h2 class="display-3 fw-bolder text-dark mb-1 mt-2">₡750</h2>
+                <h2 class="display-3 fw-bolder text-dark mb-1 mt-2">₡0</h2>
                 <span class="small text-secondary">Aprobada por ARESEP</span>
-              </div>
-              <div class="p-4 text-start">
-                <h6 class="fw-bold text-dark mb-3">Desglose por trayecto (Fraccionamiento)</h6>
-                <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
-                  <span class="text-secondary">San José - San Pedro</span>
-                  <span class="fw-medium text-dark">₡380</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
-                  <span class="text-secondary">San José - Tres Ríos</span>
-                  <span class="fw-medium text-dark">₡510</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center py-3">
-                  <span class="text-secondary">Adulto Mayor (Ley 7935)</span>
-                  <span class="fw-bold text-success">Gratis</span>
-                </div>
               </div>
             </div>
           </div>
-
         </div>
-      </div>
 
       <!-- Columna Derecha (Información de la empresa y Mapa) -->
       <div class="col-lg-4">
@@ -189,13 +132,9 @@
               </button>
             </div>
           </div>
-          
-          <div class="p-4">
-            <h6 class="fw-bold text-dark mb-3">Información de la empresa</h6>
-            <div class="small text-secondary mb-2"><strong class="text-dark">Nombre:</strong> Transportes Lumaca S.A.</div>
-            <div class="small text-secondary mb-2"><strong class="text-dark">Teléfono:</strong> 2537-0000</div>
-            <div class="small text-secondary mb-4"><strong class="text-dark">Email:</strong> info@lumaca.com</div>
-            
+
+          <!--Espacio para informacion de TELEFONO E EMAIL-->
+          <div class="p-4" id="contenedor-info-empresa">
             <button class="btn btn-light w-100 fw-medium text-secondary bg-slate-50 border">Reportar un problema</button>
           </div>
         </div>

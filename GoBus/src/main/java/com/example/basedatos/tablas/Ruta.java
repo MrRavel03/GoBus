@@ -1,17 +1,18 @@
 package com.example.basedatos.tablas;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 
 @Entity
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 public class Ruta {
     @Id
@@ -25,9 +26,31 @@ public class Ruta {
     private Double tarifa;
     private String frecuencia;
     private String estado;
+    private String telefono;
+    private String email;
 
-    public long getId() {return id;}
-    public void setId(long id) {this.id = id;}
+    public Ruta(){}
+
+
+    @JsonIgnoreProperties("ruta")
+    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true) //Para borrar una ruta junto con todos sus datos
+    private List<Horario> horarios;
+
+    @JsonIgnoreProperties("ruta")
+    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Tarifa> tarifas;
+
+    @JsonIgnoreProperties("ruta")
+    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Parada> paradas;
+
+    @JsonIgnoreProperties("ruta")
+    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true) 
+    private List<Favorito> favoritos;
+
+
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
 
     public String getOrigen() {return origen;}
     public void setOrigen(String origen) {this.origen = origen;}
@@ -51,21 +74,12 @@ public class Ruta {
     public String getEstado() {return estado;}
     public void setEstado(String estado) {this.estado = estado;}
 
-    @OneToMany(mappedBy = "ruta")
-    @JsonIgnore
-    private List<Horario> horarios;
+    public String getTelefono() {return telefono;}
+    public void setTelefono(String telefono) {this.telefono = telefono;}
 
-    @OneToMany(mappedBy = "ruta")
-    @JsonIgnore
-    private List<Tarifa> tarifas;
+    public String getEmail() {return email;}
+    public void setEmail(String email) {this.email = email;}
 
-    @OneToMany(mappedBy = "ruta")
-    @JsonIgnore
-    private List<Parada> paradas;
-
-    @OneToMany(mappedBy = "ruta")
-    @JsonIgnore
-    private List<Favorito> favoritos;
 
     public List<Horario> getHorarios() {return horarios;}
     public void setHorarios(List<Horario> horarios) {this.horarios = horarios;}

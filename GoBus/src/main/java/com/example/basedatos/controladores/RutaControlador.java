@@ -2,17 +2,17 @@ package com.example.basedatos.controladores;
 
 import com.example.basedatos.tablas.Ruta;
 import com.example.basedatos.repositorios.RutaRepositorio;
+
+import org.apache.tomcat.util.http.parser.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/rutas")
-@CrossOrigin(origins="*")
-
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 
 public class RutaControlador {
 
@@ -36,13 +36,28 @@ public class RutaControlador {
                    .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //Si el objecto ruta trae un ID se actualiza el existente
-    //Si el ID viene vacio, crea uno nuevo
-
-    //Metodo CREAR Y EDITAR
-    @PostMapping 
+    //Metodo CREAR
+    @PostMapping(consumes = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     public Ruta guardarRuta(@RequestBody Ruta ruta){
         return rutaRepositorio.save(ruta);
+    }
+
+    // METODO EDITAR
+    @PutMapping("/{id}")
+    public ResponseEntity<Ruta> actualizarRuta(@PathVariable Long id, @RequestBody Ruta rutaDetalles) {
+        return rutaRepositorio.findById(id).map(rutaExistente -> {
+            rutaExistente.setOrigen(rutaDetalles.getOrigen());
+            rutaExistente.setDestino(rutaDetalles.getDestino());
+            rutaExistente.setEmpresa(rutaDetalles.getEmpresa());
+            rutaExistente.setTipo(rutaDetalles.getTipo());
+            rutaExistente.setEstado(rutaDetalles.getEstado());
+            rutaExistente.setFrecuencia(rutaDetalles.getFrecuencia());
+            rutaExistente.setTarifa(rutaDetalles.getTarifa());
+            rutaExistente.setTelefono(rutaDetalles.getTelefono());
+            rutaExistente.setEmail(rutaDetalles.getEmail());
+            Ruta rutaActualizada = rutaRepositorio.save(rutaExistente);
+            return ResponseEntity.ok(rutaActualizada);
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     //Metodo BORRAR
