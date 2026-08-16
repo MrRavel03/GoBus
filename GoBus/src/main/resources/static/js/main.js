@@ -284,6 +284,18 @@ async function cargarUsuariosRecientes() {
     const respuesta= await fetch('http://localhost:8080/usuarios');
     const usuarios= await respuesta.json();
 
+    //En caso de que no haya usuarios registrados recientemente
+
+    if (usuarios.length===0){
+      contenedorUsuarios.innerHTML=`
+      <div class="text-center p-5 text-secondary">
+      <i data-lucide="users-2" class="mb-3 opacity-20" style="width: 48px; height: 48px;"></i>
+      <p class="small mb-0">No hay usuarios registrados todavía.</p>
+      </div>`;
+      lucide.createIcons();
+      return;
+    }
+
     let contenedorVacio='';
 
     //Cargar ultimos 3 o 5 usuarios recientemente creados
@@ -319,8 +331,8 @@ async function cargarUsuariosRecientes() {
 //RUTAS Y DETALLES
 //Angelica rutas
 
-function cargarRutasDesdeBackend() {
-  const contenedorRutas = document.querySelector(".route-card")?.parentElement;
+async function cargarRutasDesdeBackend() {
+  const contenedorRutas = document.getElementById('contenedorRutas');
 
   if (!contenedorRutas) {
     return;
@@ -397,50 +409,59 @@ function cargarDetalleRutaDesdeBackend() {
 
 
 function actualizarDetalleRuta(ruta) {
-  // Encabezado principal: San José -> Liberia
+  //SECCION 1: Encabezado y titulos
   const tituloRuta = document.querySelector("h1.fw-bolder");
 
   if (tituloRuta) {
-    tituloRuta.innerHTML = `
-      ${ruta.origen} 
-      <i data-lucide="arrow-right" class="text-muted" style="width: 24px;"></i> 
+    tituloRuta.innerHTML = `${ruta.origen} 
+    <i data-lucide="arrow-right" class="text-muted" style="width: 24px;"></i> 
       ${ruta.destino}
     `;
   }
   // Tipo de ruta y empresa
-  const tipoRuta = document.querySelector(".badge-soft-primary");
+  document.querySelector(".badge-soft-primary").textContent = ruta.tipo || "Urbano";
+  document.querySelector(".text-primary.small.fw-medium").textContent = ruta.empresa;
 
-  if (tipoRuta) {
-    tipoRuta.textContent = ruta.tipo;
+  //SECCION 1.1: Estado de la ruta (Activa/ En revision)
+  const badgeEstado = document.getElementById('badge-estado-servicio');
+  if (badgeEstado) {
+    const estadoRevision = ruta.estado === 'En revisión';
+    badgeEstado.textContent = estadoRevision ? 'En revisión' : 'Servicio Activo';
+
+    badgeEstado.className = `badge ${
+      estadoRevision 
+        ? 'bg-warning bg-opacity-10 text-warning border border-warning-subtle' 
+        : 'badge-soft-success'
+    }`;
   }
-  const empresaRuta = document.querySelector(".text-primary.small.fw-medium");
-  if (empresaRuta) {
-    empresaRuta.textContent = ruta.empresa;
-  }
-  // Tabla de horarios
-  const tablaHorarios = document.querySelector("#horarios tbody");
+
+
+  //SECCION 2: Tabla de horarios
+  const tablaHorarios = document.getElementById('tabla-horarios-cuerpo');
 
   if (tablaHorarios && ruta.horarios) {
-    tablaHorarios.innerHTML = "";
+    let horarios="";
 
-    ruta.horarios.forEach(function (horario) {
-      tablaHorarios.innerHTML += `
+    ruta.horarios.forEach(horario => {
+      horarios+= `
         <tr class="border-bottom">
           <td class="ps-4 py-3 fw-medium text-dark">${horario.dia}</td>
           <td class="py-3 text-secondary">${horario.primerServicio}</td>
           <td class="py-3 text-secondary">${horario.ultimoServicio}</td>
-          <td class="py-3 text-dark small">${horario.frecuencia}</td>
-        </tr>
-      `;
+          <td class="py-3 text-dark small">Cada ${horario.frecuencia || 'Consultar'}</td>
+        </tr>`;
     });
+    tablaHorarios.innerHTML=horarios;
   }
-  // Recorrido y paradas
+
+
+  //SECCION 3: Recorrido y paradas
   const recorrido = document.querySelector(".detail-timeline");
 
   if (recorrido && ruta.paradas) {
-    recorrido.innerHTML = "";
+    let htmlParadas = "";
 
-    ruta.paradas.forEach(function (parada, index) {
+    ruta.paradas.forEach((parada, index) => {
       let claseDot = "";
 
       if (index === 0) {
@@ -448,39 +469,36 @@ function actualizarDetalleRuta(ruta) {
       } else if (index === ruta.paradas.length - 1) {
         claseDot = "success";
       }
-      recorrido.innerHTML += `
+      htmlParadas+= `
         <div class="detail-timeline-item">
           <div class="detail-timeline-dot ${claseDot}"></div>
           <h6 class="fw-bold text-dark mb-1">${parada.nombre}</h6>
-          <p class="small text-secondary mb-0">${parada.descripcion}</p>
-        </div>
-      `;
+          <p class="small text-secondary mb-0">${parada.descripcion || ''}</p> 
+        </div>`;
     });
+    recorrido.innerHTML= htmlParadas;
   }
 
+
+  //SECCION 4: Tarifa y empresa
   // Tarifa principal
   const tarifaPrincipal = document.querySelector("#tarifas h2");
 
   if (tarifaPrincipal) {
-    tarifaPrincipal.textContent = `₡${Number(ruta.tarifa).toLocaleString("es-CR")}`;
+    tarifaPrincipal.textContent = `₡${(ruta.tarifa || 0).toLocaleString("es-CR")}`;
   }
+
   // Información de empresa
   const infoEmpresa = document.querySelector(".col-lg-4 .p-4");
 
   if (infoEmpresa) {
     infoEmpresa.innerHTML = `
       <h6 class="fw-bold text-dark mb-3">Información de la empresa</h6>
-      <div class="small text-secondary mb-2">
-        <strong class="text-dark">Nombre:</strong> ${ruta.empresa}
-      </div>
-      <div class="small text-secondary mb-2">
-        <strong class="text-dark">Teléfono:</strong> ${ruta.telefono}
-      </div>
-      <div class="small text-secondary mb-4">
-        <strong class="text-dark">Email:</strong> ${ruta.email}
-      </div>
+      <div class="small text-secondary mb-2"><strong class="text-dark">Nombre:</strong> ${ruta.empresa}</div>
+      <div class="small text-secondary mb-2"><strong class="text-dark">Teléfono:</strong> ${ruta.telefono || 'No disponible'}</div>
+      <div class="small text-secondary mb-4"><strong class="text-dark">Email:</strong> ${ruta.email || 'No disponible'}</div>
 
-      <button class="btn btn-light w-100 fw-medium text-secondary bg-slate-50 border">
+      <button class="btn btn-light w-100 fw-medium text-secondary bg-slate-50 border" onclick="reportarProblema()">
         Reportar un problema
       </button>
     `;
@@ -488,31 +506,626 @@ function actualizarDetalleRuta(ruta) {
   if (typeof lucide !== "undefined") {
     lucide.createIcons();
   }
+
+  inicializarMapaDetalleRuta(ruta.paradas);
 }
 
+//RUTAS
+
+//Funcion para mostrar rutas visualmente en el panel de admin
+async function cargarRutasPanelAdmin() {
+  const tablaAdmin = document.querySelector('#tabla-rutas-admin');
+  if (!tablaAdmin) return; //Verificar si la tabla existe
+
+  tablaAdmin.innerHTML = '<tr><td colspan="7" class="text-center">Actualizando...</td></tr>';
+
+  try {
+    const respuesta = await fetch("/api/rutas");
+    const rutas = await respuesta.json();
+
+    let filasHTML = "";
+
+    rutas.forEach(ruta => {
+      const badgeColor = ruta.estado === 'Activa' ? 'bg-success' : 'bg-warning'; //Si la ruta dice "Activa" se guarda como bg-success, si no es asi se guarda como bg-warning
+
+      //Inyecta esos valores a la base de datos
+      filasHTML += ` 
+      <tr class="border-bottom">
+      <td class="ps-4 py-3 fw-bold text-dark">${ruta.origen} - ${ruta.destino}</td>
+      <td class="py-3 text-secondary">${ruta.empresa}</td>
+      <td class="py-3 text-secondary">${ruta.tipo}</td>
+      <td class="py-3 fw-bolder text-dark">₡${(ruta.tarifa || 0).toLocaleString("es-CR")}</td>
+      <td class="py-3">${ruta.frecuencia || 'N/A'}</td>
+      <td class="py-3">
+      <span class="badge ${badgeColor} bg-opacity-10 ${badgeColor.replace('bg-', 'text-')} rounded-pill px-3">
+              ${ruta.estado || 'Activa'}
+      </span>
+      </td>
+      <td class="py-3 text-end pe-4">
+      <div class="d-flex gap-2 justify-content-end">
+
+      <button onclick="gestionarHorarios(${ruta.id}, '${ruta.origen} - ${ruta.destino}')" class="btn btn-sm btn-info text-white">
+      <i data-lucide="clock" style="width:14px;"></i> Horarios
+      </button>
+
+      <button onclick="gestionarParadas(${ruta.id}, '${ruta.origen} - ${ruta.destino}')" class="btn btn-sm btn-warning text-dark">
+      <i data-lucide="map-pin" style="width:14px;"></i> Paradas
+      </button>
+
+
+      <button onclick="prepararEdicion(${ruta.id})" class="btn btn-sm btn-light border">Editar</button>
+      <button onclick="eliminarRuta(${ruta.id})" class="btn btn-sm btn-outline-danger">Eliminar</button>
+      </div>
+      </td>
+       </tr>`;
+    });
+
+    //Coloca todo lo que esta acumulado en filasHTML y lo coloca en la tablaAdmin
+
+    tablaAdmin.innerHTML = filasHTML;
+
+    if (typeof lucide !== "undefined") lucide.createIcons(); //Volver a dibujar los iconos
+
+  } catch (error) {
+    console.error("Error al conectar con la API de rutas:", error); //Manejo de errores
+    tablaAdmin.innerHTML = '<tr><td colspan="7" class="text-danger text-center">Error al cargar datos</td></tr>';
+  }
+}
+
+async function guardarRuta(e) {
+  e.preventDefault();
+  const idRuta=document.getElementById('rutaID').value;
+
+  //Recoleccion de datos de lo que se escribio en el modal
+  const datosRuta = {
+    origen: document.getElementById('origen').value,
+    destino: document.getElementById('destino').value,
+    empresa: document.getElementById('empresa').value,
+    tarifa: parseFloat(document.getElementById('tarifa').value) || 0,
+    frecuencia: document.getElementById('frecuencia').value,
+    tipo: document.getElementById('tipo').value,
+    estado: document.getElementById('estado').value,
+    telefono: document.getElementById('telefonoEmpresa').value,
+    email: document.getElementById('emailEmpresa').value,
+  };
+
+  //Definir el metodo, si es editar o crear
+  let url = "http://localhost:8080/api/rutas";
+  let metodo = "POST";
+
+  //Editar ruta
+  if (idRuta && idRuta.trim() !== "") {
+    url = `http://localhost:8080/api/rutas/${idRuta}`;
+    metodo = "PUT";
+    datosRuta.id = parseInt(idRuta, 10);
+  }
+
+  try {
+    const respuesta = await fetch(url, {
+      method: metodo,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datosRuta)
+    });
+
+
+    if (respuesta.ok) {
+      Swal.fire('¡Éxito!', `La ruta se ${metodo === 'PUT' ? 'actualizó' : 'guardó'} correctamente`, 'success');
+
+      //Cerrar el modal de manera segura
+      const elementoModal = document.getElementById('modalRuta');
+      const modal = bootstrap.Modal.getInstance(elementoModal);
+      if (modal) {
+        modal.hide();
+      }
+
+      limpiarFormularioRuta();
+
+      //Volver a llamar a la funcion para que muestre la lista actualizada y la dibuje
+      cargarRutasPanelAdmin();
+    }else{
+      Swal.fire('Error', 'No se pudo guardar la ruta', 'error');
+    }
+  } catch (error) {
+    console.error("Error al guardar la ruta:", error);
+    Swal.fire('Error', 'Error de conexión con el servidor', 'error');  }
+}
+
+async function prepararEdicion(id) {
+  try {
+    const respuesta = await fetch(`/api/rutas/${id}`);
+    const ruta = await respuesta.json();
+
+    document.getElementById('modalTitulo').innerText = "Editar ruta";
+    document.getElementById('rutaID').value = ruta.id;
+
+    document.getElementById('origen').value = ruta.origen ||"";
+    document.getElementById('destino').value = ruta.destino ||"";
+      document.getElementById('empresa').value = ruta.empresa ||"";
+    document.getElementById('tarifa').value = ruta.tarifa || 0;
+    document.getElementById('frecuencia').value = ruta.frecuencia ||"";
+    document.getElementById('tipo').value = ruta.tipo ||"Urbano";
+    document.getElementById('estado').value = ruta.estado ||"Activa";
+    document.getElementById('telefonoEmpresa').value = ruta.telefono ||"";
+    document.getElementById('emailEmpresa').value = ruta.email ||"";
+
+
+
+    const modalRuta = new bootstrap.Modal(document.getElementById('modalRuta'));
+    modalRuta.show();
+
+
+  } catch (error) {
+    console.error("Error al cargar datos para editar:", error);
+  }
+}
+
+
+async function eliminarRuta(id){
+  const result= await Swal.fire({
+    title: '¿Eliminar ruta?',
+    text: "Esta acción no se puede deshacer",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (result.isConfirmed){
+    try{
+      const respuesta= await fetch (`/api/rutas/${id}`, { method: 'DELETE' });
+      if (respuesta.ok){
+        Swal.fire('Eliminada', 'La ruta ha sido borrada', 'success');
+        cargarRutasPanelAdmin();
+      }
+
+    }catch(error){
+       Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+    }
+  }
+}
+
+
+
+function limpiarFormularioRuta(){
+    document.getElementById('modalTitulo').innerText="Agregar nueva ruta";
+    document.getElementById('formularioRuta').reset();
+    document.getElementById('rutaID').value="";
+}
+
+//HORARIOS
+
+async function gestionarHorarios(idRuta, nombre) {
+    document.getElementById('rutaIdDestino').value=idRuta;
+    document.getElementById('nombreRutaHorario').innerText=nombre;
+
+    document.getElementById('formularioNuevoHorario').reset();
+
+    //Traer la ruta completa para ver todos sus horarios
+    const respuesta= await fetch(`/api/rutas/${idRuta}`);
+    const ruta= await respuesta.json();
+
+    const contenedor= document.getElementById('listaHorariosRuta');
+    contenedor.innerHTML="";
+
+    //Dibujar cada horario en una lista junto con un boton para eliminar
+    ruta.horarios.forEach(h => {
+      contenedor.innerHTML += `
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+      <span>
+      <strong>${h.dia}:</strong> ${h.primerServicio} - ${h.ultimoServicio}
+      <span class="text-muted ms-1">(Cada ${h.frecuencia})</span>
+      </span>
+      <button onclick="eliminarHorario(${h.id}, ${idRuta}, '${nombre}')" class="btn btn-sm text-danger border-0">Borrar</button>
+      </div>`;
+    });
+
+    //Abrir el modal solo si no esta abierto
+    const modalElemento = document.getElementById('modalHorarios');
+    if (!modalElemento.classList.contains('show')) {
+      const modalBootstrap = new bootstrap.Modal(modalElemento);
+      modalBootstrap.show();
+    }
+
+  }
+
+
+async function guardarHorario(e) {
+  e.preventDefault();
+
+  //Recoleccion de datos de lo que se escribio en el modal de horario
+  const dia = document.getElementById('horarioDia').value.trim();
+  const primerServicio = document.getElementById('horarioInicio').value.trim();
+  const ultimoServicio = document.getElementById('horarioFin').value.trim();
+
+  const numFrecuenciaInput = document.getElementById('horarioFrecuenciaNum');
+  const unidadFrecuenciaInput = document.getElementById('horarioFrecuenciaUnidad');
+  //Validar si existe el campo de numero
+  const numFrecuencia = numFrecuenciaInput ? parseInt(numFrecuenciaInput.value.trim(), 10) : 0;
+  //Validar si existe el campo selector
+  const unidadFrecuencia = unidadFrecuenciaInput ? unidadFrecuenciaInput.value : 'min';
+  
+  const frecuencia = `${numFrecuencia} ${unidadFrecuencia}`;
+
+  const rutaId = document.getElementById('rutaIdDestino').value;
+
+  //Validar que los campos no esten vacios
+  if (!dia || primerServicio.trim() === "" || ultimoServicio.trim() === "" || frecuencia.trim() === "") {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campos incompletos',
+      text: 'Por favor complete todos los campos',
+      confirmButtonColor: '#0d6efd'
+    });
+    return;
+  }
+
+
+  //Validacion para revisar si la hora del ultimo servicio es menor o igual a la hora del primer servicio
+  const minutosInicio = convertirHorasAMinutos(primerServicio);
+  const minutosFin = convertirHorasAMinutos(ultimoServicio);
+  if (minutosFin <= minutosInicio) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Horarios incoherentes',
+      text: 'El último servicio no puede ser igual o anterior al primer servicio.',
+      confirmButtonColor: '#dc3545'
+    });
+    return;
+  }
+
+  //Validacion para evitar que la frecuencia sea enviada con valores negativos o decimales
+  if (isNaN(numFrecuencia) || numFrecuencia <= 0) {
+    Swal.fire({
+    icon: 'error',
+    title: 'Frecuencia inválida',
+    text: 'Ingrese un número entero positivo válido',
+    confirmButtonColor: '#dc3545'
+  });
+  return;
+}
+
+//Validacion de frecuencia para que no sea mayor a la duracion total del servicio
+const duracionRutaMinutos = minutosFin - minutosInicio;
+let frecuenciaMinutos = numFrecuencia;
+if (unidadFrecuencia === 'hr') {
+  frecuenciaMinutos = numFrecuencia * 60;
+}
+
+if (frecuenciaMinutos > duracionRutaMinutos) {
+  Swal.fire({
+    icon: 'error',
+    title: 'Frecuencia ilógica',
+    text: `La frecuencia (${numFrecuencia} ${unidadFrecuencia}) es mayor que la duración total de la ruta (${duracionRutaMinutos} min).`,
+    confirmButtonColor: '#dc3545'
+  });
+  return;
+}
+
+
+  //Armar el objecto con los datos
+  const datosHorarios = {
+    dia: dia,
+    primerServicio: primerServicio,
+    ultimoServicio: ultimoServicio,
+    frecuencia: frecuencia,
+
+
+    //Conectar el horario con su respectiva ruta
+    ruta: { id: Number(rutaId) }
+  };
+
+  try {
+    const respuesta = await fetch("http://localhost:8080/api/horarios", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datosHorarios)
+    });
+
+
+    if (respuesta.ok) {
+      const nombreRuta = document.getElementById('nombreRutaHorario').innerText;
+
+      //Limpiar campos del formulario
+      document.getElementById('formularioNuevoHorario').reset();
+
+      const idRuta = document.getElementById('rutaIdDestino').value;
+
+      //Refrescar de nuevo la lista
+      gestionarHorarios(idRuta, nombreRuta);
+
+      Swal.fire({ title: '¡Agregado!', icon: 'success', timer: 1000, showConfirmButton: false });
+
+    }
+  } catch (error) {
+    console.error("Error al guardar horario:", error);
+  }
+}
+
+
+  async function eliminarHorario(idHorario, idRuta, nombreRuta){
+  const result= await Swal.fire({
+    title: '¿Eliminar este horario?',
+    text: "Esta acción quitará el horario de la ruta seleccionada",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (result.isConfirmed){
+    try{
+      const respuesta= await fetch(`/api/horarios/${idHorario}`, { method: 'DELETE' });
+
+      if (respuesta.ok){
+        Swal.fire({ title: 'Eliminado!', icon: 'success', timer: 1000, showConfirmButton: false });
+        gestionarHorarios(idRuta, nombreRuta);
+      }
+
+    }catch(error){
+       Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+    }
+  }
+}
+
+function convertirHorasAMinutos(horaString){
+  //Validacion por si la hora viene null, no existe o es undefined 
+  if (!horaString) return 0;
+
+  //Expresion para separar hora, minutos y el indicador AM/PM
+  const expresionHora = horaString.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!expresionHora) return 0;
+
+    let horas= parseInt(expresionHora[1], 10);
+    const minutos = parseInt(expresionHora[2], 10);
+
+    //Evita problemas de minúsculas
+    const ampm = expresionHora[3].toUpperCase();
+
+    //Convierte a formato 24 horas
+    if (ampm === 'PM' && horas < 12) horas += 12;
+    if (ampm === 'AM' && horas === 12) horas = 0;
+
+    //Total de minutos en el dia
+    return horas * 60 + minutos;
+
+}
+
+//FUNCIONES DEL MAPA
+var mapaAdmin=null;
+var seleccionMarcador=null;
+var mapaDetalle=null;
+
+
+//Funcion que abre el modal, activa el mapa selector y carga las paradas existentes
+async function gestionarParadas(idRuta, nombreRuta){
+   document.getElementById('rutaIdParaParada').value = idRuta;
+   document.getElementById('nombreRutaParada').innerText = nombreRuta;
+
+   //Traer paradas actuales de la ruta
+   const res= await fetch(`/api/rutas/${idRuta}`);
+   const ruta= await res.json();
+
+   //Dibujar la lista de paradas en el modal
+   const contenedor = document.getElementById('listaParadasRuta');
+   contenedor.innerHTML = "";
+    ruta.paradas.forEach(p => {
+      contenedor.innerHTML += `
+       <div class="list-group-item d-flex justify-content-between align-items-center">
+       <span><strong>${p.nombre}</strong> <br>
+       <p class="small text-secondary mb-0">${p.descripcion || ''}</p>
+       <small class="text-muted">Lat: ${p.latitud.toFixed(4)} 
+       | Lon: ${p.longitud.toFixed(4)}</small></span>
+       <button onclick="eliminarParada(${p.id}, ${idRuta}, '${nombreRuta}')" class="btn btn-sm text-danger border-0">Borrar</button>
+       </div>`;
+       });
+
+       //Mostrar el modal
+        const modal = document.getElementById('modalParadas');
+        const instancia = bootstrap.Modal.getOrCreateInstance(modal);
+         instancia.show(); 
+      
+        //Esperar a que el modal se abra
+        setTimeout(() => prepararMapaAdmin(), 500);
+
+        }
+
+
+//Funcion donde se capturan las coordenadas sin necesidad de que el admin las escriba
+function prepararMapaAdmin() {
+  if (mapaAdmin) { mapaAdmin.remove(); }
+
+  seleccionMarcador = null;
+
+  //Mapa centrado por defecto en San Jose
+  mapaAdmin = L.map('mapa-admin-selector').setView([9.9333, -84.0833], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaAdmin);
+
+  mapaAdmin.on('click', async function(e) {
+    const latitud = e.latlng.lat;
+    const longitud = e.latlng.lng;
+
+    //LLenado automatico de los inputs latitud y longitud
+     document.getElementById('p_lat').value = latitud;
+     document.getElementById('p_lon').value = longitud;
+
+     try{
+      //Consultar a OpenStreetMap por la direccion segun la latitud y longitud del marcador de seleccion
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitud}&lon=${longitud}`);
+      const datos = await res.json();
+     
+     //Si se encuentra una direccion se coloca
+     if (datos.display_name) {
+      //Coloca solo las tres primeras partes de la direccion
+      const partes = datos.display_name.split(',');
+      const direccionCorta = partes.slice(0, 3).join(',').trim();
+      document.getElementById('paradaDescripcion').value = direccionCorta;     
+    }
+
+     } catch (error) {
+      console.log("No se pudo obtener la dirección automática.");
+     }
+
+     //Para hacerle saber al admin lo que eligio
+     if (seleccionMarcador) { seleccionMarcador.setLatLng(e.latlng); }
+     else { seleccionMarcador = L.marker(e.latlng).addTo(mapaAdmin); }
+     });
+    }
+
+
+//FUNCION para guardar la parada
+async function guardarParada(e) {
+  e.preventDefault();
+  const idRuta = document.getElementById('rutaIdParaParada').value;
+  const nombreRuta = document.getElementById('nombreRutaParada').innerText;
+
+  const datos = {
+    nombre: document.getElementById('paradaNombre').value,
+    descripcion: document.getElementById('paradaDescripcion').value, 
+    latitud: parseFloat(document.getElementById('p_lat').value),
+    longitud: parseFloat(document.getElementById('p_lon').value),
+    ruta: { id: Number(idRuta) }
+    };
+
+    const res = await fetch("http://localhost:8080/api/paradas", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(datos)
+       });
+
+       if (res.ok) {
+
+        //Limpiar el formulario
+        document.getElementById('formNuevaParada').reset();
+        
+        //Remover el marcador del mapa en caso de que exista
+        if (seleccionMarcador && mapaAdmin) {
+          mapaAdmin.removeLayer(seleccionMarcador);
+          seleccionMarcador = null;
+        }
+
+        gestionarParadas(idRuta, nombreRuta); 
+
+          Swal.fire({ title: '¡Parada registrada!', 
+            icon: 'success', 
+            timer: 1000, 
+            showConfirmButton: false,
+            target: document.getElementById('modalParadas') });
+       }
+      }
+
+//FUNCION de la pagina detalle ruta
+      function  inicializarMapaDetalleRuta(paradas){
+        if (mapaDetalle) { mapaDetalle.remove(); } //Borra el mapa viejo de la memoria
+        if (!paradas || paradas.length === 0) return; //En caso de que una ruta no tenga paradas registradas no dibuja el mapa
+
+        //Centrar el mapa en la primera parada
+        mapaDetalle = L.map('mapa-interactivo').setView([paradas[0].latitud, paradas[0].longitud], 14); //Para indicarle al usuario donde empieza su viaje
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaDetalle); //
+
+         paradas.forEach(p => {
+           L.marker([p.latitud, p.longitud])
+            .addTo(mapaDetalle)
+            .bindPopup(`<b>${p.nombre}</b><br>Punto de abordaje oficial`);
+         });
+      }
+
+
+  //FUNCION ELIMINAR PARADA
+      async function eliminarParada(idParada, idRuta, nombreRuta){
+        const resultado = await Swal.fire({
+          title: '¿Eliminar parada?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar',
+          target: document.getElementById('modalParadas')  //La alerta sale sobre el modal
+        });
+
+        if (resultado.isConfirmed) {
+          const res = await fetch(`/api/paradas/${idParada}`, { method: 'DELETE' });
+          if (res.ok) {
+            
+            await Swal.fire({ title: 'Eliminada', 
+              text: 'Parada quitada de la ruta', 
+              icon: 'success', timer: 1000, 
+              showConfirmButton: false,
+              target: document.getElementById('modalParadas')
+             });
+            gestionarParadas(idRuta, nombreRuta);
+    }
+  }
+}
+
+//Funcion para borrar cualquier sombra que haya quedado de un modal
+function forzarCierreModal() {
+  document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = 'auto';
+  document.body.style.paddingRight = '0';
+}
 
 
   //INICIALIACION
   document.addEventListener("DOMContentLoaded", function () {
 
-    //Cargar header
-    cargarPlantillas();
+    //Para que la carga de la pagina sea rapida e eficiente
+    Promise.all([
+    //Cargar estructura visual
+    cargarPlantillas(),
 
-    //Registro
+    //Cargar usuarios recientes en el panel de admin
+    cargarUsuariosRecientes(),
+
+    //Llenado de tabla para admin
+    cargarRutasPanelAdmin(),
+
+     //Cargar datos de rutas
+    cargarRutasDesdeBackend(),
+    cargarDetalleRutaDesdeBackend(),
+
+    ]).then(() => {
+      console.log("Datos dinamicos cargados");
+    });
+
+
+    //Listeners de formularios
+    //Crear cuenta
     crearCuenta();
-
     //Login
     iniciarSesion();
-
     //Boton contrasena
     verContrasena('#togglePassword', '#password');
 
-    //Cargar usuarios recientes en el panel de admin
-    cargarUsuariosRecientes();
+    //Guardar/editar ruta en el modal, para que el evento submit ya este conectado a la funcion
+    const formularioRuta = document.getElementById('formularioRuta');
+    if (formularioRuta) {
+      formularioRuta.addEventListener('submit', guardarRuta);
+    }
 
-    //Cargar datos de rutas
-    cargarRutasDesdeBackend();
-    cargarDetalleRutaDesdeBackend();
+    //Para borrar cualquier sombra negra restante
+    const modalParadas = document.getElementById('modalParadas');
+     if (modalParadas) {
+      modalParadas.addEventListener('hidden.bs.modal', function () {
+        forzarCierreModal();
+        if (mapaAdmin) {
+          mapaAdmin.remove();
+          mapaAdmin = null;
+        }
+         seleccionMarcador = null;
+      });
+    } 
 
+
+    //Activar la libreria de reloj
+    if (typeof flatpickr !== 'undefined' && document.querySelector(".reloj-pro")) {
+    flatpickr(".reloj-pro", {
+      enableTime: true,
+      noCalendar: true, 
+      dateFormat: "h:i K", //Formato estilo "8:00 AM"
+      minuteIncrement: 15,
+    });
+  }
 
 });

@@ -11,6 +11,10 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!--Script de las funciones del main.js-->
+  <script src="js/main.js"></script>
+
 </head>
 
 <body class="d-flex flex-column min-vh-100 bg-slate-50">
@@ -95,104 +99,7 @@
         </div>
 
         <!-- Tarjetas de Rutas -->
-        <div class="d-flex flex-column gap-3 mb-4">
-
-          <!-- Ruta 1 -->
-          <a href="detalle-ruta.html" class="route-card p-4">
-            <div class="row align-items-center">
-              <div class="col-8 col-md-9">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <span class="badge-soft-primary small">Urbano</span>
-                  <span class="text-secondary small fw-medium">• Lumaca</span>
-                </div>
-                <div class="route-path">
-                  <div class="route-dot start"></div>
-                  <h6 class="fw-bold text-dark mb-3">San José</h6>
-                  <div class="route-dot end"></div>
-                  <h6 class="fw-bold text-dark mb-0">Cartago</h6>
-                </div>
-              </div>
-              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
-                <span class="text-secondary small d-flex align-items-center gap-1 mb-2"><i data-lucide="clock"
-                    style="width:14px;"></i> Cada 10 min</span>
-                <span class="fs-4 fw-bolder text-dark mb-2">₡1400</span>
-                <div class="btn-round-arrow"><i data-lucide="chevron-right" style="width: 20px;"></i></div>
-              </div>
-            </div>
-          </a>
-
-          <!-- Ruta 2 (Destacada azul) -->
-          <a href="detalle-ruta.html" class="route-card p-4">
-            <div class="row align-items-center">
-              <div class="col-8 col-md-9">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <span class="badge-soft-primary small">Urbano</span>
-                  <span class="text-secondary small fw-medium">• Busetas Heredianas</span>
-                </div>
-                <div class="route-path">
-                  <div class="route-dot start"></div>
-                  <h6 class="fw-bold text-dark mb-3">San José</h6>
-                  <div class="route-dot end"></div>
-                  <h6 class="fw-bold text-dark mb-0">Heredia</h6>
-                </div>
-              </div>
-              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
-                <span class="text-secondary small d-flex align-items-center gap-1 mb-2"><i data-lucide="clock"
-                    style="width:14px;"></i> Cada 5 min</span>
-                <span class="fs-4 fw-bolder text-dark mb-2">₡720</span>
-                <div class="btn-round-arrow"><i data-lucide="chevron-right" style="width: 20px;"></i></div>
-              </div>
-            </div>
-          </a>
-
-          <!-- Ruta 3 -->
-          <a href="detalle-ruta.html" class="route-card p-4">
-            <div class="row align-items-center">
-              <div class="col-8 col-md-9">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <span class="badge-soft-primary small">Urbano</span>
-                  <span class="text-secondary small fw-medium">• Tuasa</span>
-                </div>
-                <div class="route-path">
-                  <div class="route-dot start"></div>
-                  <h6 class="fw-bold text-dark mb-3">San José</h6>
-                  <div class="route-dot end"></div>
-                  <h6 class="fw-bold text-dark mb-0">Alajuela</h6>
-                </div>
-              </div>
-              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
-                <span class="text-secondary small d-flex align-items-center gap-1 mb-2"><i data-lucide="clock"
-                    style="width:14px;"></i> Cada 10 min</span>
-                <span class="fs-4 fw-bolder text-dark mb-2">₡680</span>
-                <div class="btn-round-arrow"><i data-lucide="chevron-right" style="width: 20px;"></i></div>
-              </div>
-            </div>
-          </a>
-
-          <!-- Ruta 4 -->
-          <a href="detalle-ruta.html" class="route-card p-4">
-            <div class="row align-items-center">
-              <div class="col-8 col-md-9">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <span class="badge-soft-primary small">Interurbano</span>
-                  <span class="text-secondary small fw-medium">• Pulmitan</span>
-                </div>
-                <div class="route-path">
-                  <div class="route-dot start"></div>
-                  <h6 class="fw-bold text-dark mb-3">San José</h6>
-                  <div class="route-dot end"></div>
-                  <h6 class="fw-bold text-dark mb-0">Liberia</h6>
-                </div>
-              </div>
-              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
-                <span class="text-secondary small d-flex align-items-center gap-1 mb-2"><i data-lucide="clock"
-                    style="width:14px;"></i> Cada 2 horas</span>
-                <span class="fs-4 fw-bolder text-dark mb-2">₡4,500</span>
-                <div class="btn-round-arrow"><i data-lucide="chevron-right" style="width: 20px;"></i></div>
-              </div>
-            </div>
-          </a>
-
+        <div id="contenedorRutas" class="d-flex flex-column gap-3 mb-4">
         </div>
 
         <!-- Paginación -->

@@ -2,7 +2,6 @@ package com.example.basedatos.controladores;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +14,9 @@ import com.example.basedatos.repositorios.UsuarioRepositorio;
 import com.example.basedatos.tablas.Usuario;
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/usuarios")
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 
 public class UsuarioControlador {
     @Autowired
