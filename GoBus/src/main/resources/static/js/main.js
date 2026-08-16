@@ -398,6 +398,111 @@ function activarBusqueda() {
 }
 
 
+// Imagenes por defecto segun el origen de la ruta.
+// Si el origen no coincide con ninguna, se usa la imagen "default".
+const IMAGENES_POR_ORIGEN = {
+  "san jose": "https://www.geckoroutes.com/images/wp-uploads/2021/10/Aerial-view-of-Costa-Ricas-San-Jose-city.jpg",
+  "alajuela": "https://costarica.org/wp-content/uploads/2014/12/Alajuela-Building1.jpg",
+  "heredia": "https://media.licdn.com/dms/image/v2/D4E12AQH8SKQDWor_kg/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1685067618225?e=2147483647&v=beta&t=oeppYclxfvpdzasfmjpxHMexONIh4HOb7n4X5l2lIDk",
+  "cartago": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaE_tmCJP22O6_1VPiT3T0YLbDwt-iOcdeJzvlS2TKlfRoTNDybGjDhqE&s=10",
+  "default": "https://img.magnific.com/vector-gratis/ubicacion-pin-ruta-bandera_78370-4270.jpg?semt=ais_hybrid&w=740&q=80"
+};
+
+// Quita tildes y pasa a minusculas para poder comparar "San Jose" con "san jose".
+function normalizarTexto(texto) {
+  return (texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+// Busca en IMAGENES_POR_ORIGEN una clave que este contenida en el origen de la ruta.
+function obtenerImagenPorOrigen(origen) {
+  const origenNormalizado = normalizarTexto(origen);
+
+  for (const clave in IMAGENES_POR_ORIGEN) {
+    if (clave !== "default" && origenNormalizado.includes(clave)) {
+      return IMAGENES_POR_ORIGEN[clave];
+    }
+  }
+  return IMAGENES_POR_ORIGEN["default"];
+}
+
+// Devuelve una copia del arreglo mezclada al azar (Fisher-Yates).
+function mezclarArreglo(arreglo) {
+  const copia = [...arreglo];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+}
+
+// Carga 3 rutas al azar desde el backend y las pinta en index.html
+function cargarRutasDestacadas() {
+  const contenedor = document.getElementById("contenedor-rutas-destacadas");
+
+  if (!contenedor) {
+    return;
+  }
+
+  fetch("/api/rutas")
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("El servidor respondio " + response.status);
+      }
+      return response.json();
+    })
+    .then(function (rutas) {
+      if (!Array.isArray(rutas) || rutas.length === 0) {
+        contenedor.innerHTML = `<p class="text-center text-secondary">No hay rutas destacadas por ahora.</p>`;
+        return;
+      }
+
+      const rutasElegidas = mezclarArreglo(rutas).slice(0, 3);
+
+      let html = "";
+
+      rutasElegidas.forEach(function (ruta) {
+        const imagen = obtenerImagenPorOrigen(ruta.origen);
+
+        html += `
+          <div class="col">
+            <a href="detalle-ruta.html?id=${ruta.id}" class="text-decoration-none">
+              <div class="card h-100 card-route border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="position-relative">
+                  <img src="${imagen}" class="card-img-top"
+                    style="height: 220px; object-fit: cover; width: 100%;" alt="${ruta.destino}">
+                  <div class="position-absolute top-0 end-0 m-3">
+                    <span class="badge bg-white text-dark rounded-pill px-3 py-2 shadow-sm fs-6">${formatearColones(ruta.tarifa)}</span>
+                  </div>
+                </div>
+                <div class="card-body p-4">
+                  <h5 class="card-title fw-bold mb-1">${ruta.origen} - ${ruta.destino}</h5>
+                  <p class="card-text text-muted small mb-3">${ruta.empresa}</p>
+                  <div class="d-flex gap-3 small text-secondary">
+                    <span class="d-flex align-items-center gap-1"><i data-lucide="clock" style="width:16px;"></i> ${ruta.frecuencia || "N/D"}</span>
+                    <span class="d-flex align-items-center gap-1"><i data-lucide="map-pin" style="width:16px;"></i> ${ruta.tipo || "Directo"}</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+      });
+
+      contenedor.innerHTML = html;
+
+      if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+      }
+    })
+    .catch(function (error) {
+      console.error("Error al cargar las rutas destacadas:", error);
+      contenedor.innerHTML = `<p class="text-center text-danger">No se pudieron cargar las rutas destacadas.</p>`;
+    });
+}
+
 function cargarRutasDesdeBackend() {
   const contenedorRutas = document.getElementById("contenedor-rutas");
 
@@ -628,6 +733,9 @@ function actualizarDetalleRuta(ruta) {
     //Cargar datos de rutas
     cargarRutasDesdeBackend();
     cargarDetalleRutaDesdeBackend();
+
+    //Cargar rutas destacadas al azar en index.html
+    cargarRutasDestacadas();
 
 
 });
