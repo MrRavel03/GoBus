@@ -448,7 +448,7 @@ function actualizarDetalleRuta(ruta) {
           <td class="ps-4 py-3 fw-medium text-dark">${horario.dia}</td>
           <td class="py-3 text-secondary">${horario.primerServicio}</td>
           <td class="py-3 text-secondary">${horario.ultimoServicio}</td>
-          <td class="py-3 text-dark small">${horario.frecuencia || 'Consultar'}</td>
+          <td class="py-3 text-dark small">Cada ${horario.frecuencia || 'Consultar'}</td>
         </tr>`;
     });
     tablaHorarios.innerHTML=horarios;
@@ -473,7 +473,7 @@ function actualizarDetalleRuta(ruta) {
         <div class="detail-timeline-item">
           <div class="detail-timeline-dot ${claseDot}"></div>
           <h6 class="fw-bold text-dark mb-1">${parada.nombre}</h6>
-          <p class="small text-secondary mb-0">${parada.descripcion}</p>
+          <p class="small text-secondary mb-0">${parada.descripcion || ''}</p> 
         </div>`;
     });
     recorrido.innerHTML= htmlParadas;
@@ -506,6 +506,8 @@ function actualizarDetalleRuta(ruta) {
   if (typeof lucide !== "undefined") {
     lucide.createIcons();
   }
+
+  inicializarMapaDetalleRuta(ruta.paradas);
 }
 
 //RUTAS
@@ -546,8 +548,12 @@ async function cargarRutasPanelAdmin() {
       <i data-lucide="clock" style="width:14px;"></i> Horarios
       </button>
 
-      <button onclick="prepararEdicion(${ruta.id})" class="btn btn-sm btn-light border">Editar</button>
+      <button onclick="gestionarParadas(${ruta.id}, '${ruta.origen} - ${ruta.destino}')" class="btn btn-sm btn-warning text-dark">
+      <i data-lucide="map-pin" style="width:14px;"></i> Paradas
+      </button>
 
+
+      <button onclick="prepararEdicion(${ruta.id})" class="btn btn-sm btn-light border">Editar</button>
       <button onclick="eliminarRuta(${ruta.id})" class="btn btn-sm btn-outline-danger">Eliminar</button>
       </div>
       </td>
@@ -886,6 +892,180 @@ function convertirHorasAMinutos(horaString){
 
 }
 
+//FUNCIONES DEL MAPA
+var mapaAdmin=null;
+var seleccionMarcador=null;
+var mapaDetalle=null;
+
+
+//Funcion que abre el modal, activa el mapa selector y carga las paradas existentes
+async function gestionarParadas(idRuta, nombreRuta){
+   document.getElementById('rutaIdParaParada').value = idRuta;
+   document.getElementById('nombreRutaParada').innerText = nombreRuta;
+
+   //Traer paradas actuales de la ruta
+   const res= await fetch(`/api/rutas/${idRuta}`);
+   const ruta= await res.json();
+
+   //Dibujar la lista de paradas en el modal
+   const contenedor = document.getElementById('listaParadasRuta');
+   contenedor.innerHTML = "";
+    ruta.paradas.forEach(p => {
+      contenedor.innerHTML += `
+       <div class="list-group-item d-flex justify-content-between align-items-center">
+       <span><strong>${p.nombre}</strong> <br>
+       <p class="small text-secondary mb-0">${p.descripcion || ''}</p>
+       <small class="text-muted">Lat: ${p.latitud.toFixed(4)} 
+       | Lon: ${p.longitud.toFixed(4)}</small></span>
+       <button onclick="eliminarParada(${p.id}, ${idRuta}, '${nombreRuta}')" class="btn btn-sm text-danger border-0">Borrar</button>
+       </div>`;
+       });
+
+       //Mostrar el modal
+        const modal = document.getElementById('modalParadas');
+        const instancia = bootstrap.Modal.getOrCreateInstance(modal);
+         instancia.show(); 
+      
+        //Esperar a que el modal se abra
+        setTimeout(() => prepararMapaAdmin(), 500);
+
+        }
+
+
+//Funcion donde se capturan las coordenadas sin necesidad de que el admin las escriba
+function prepararMapaAdmin() {
+  if (mapaAdmin) { mapaAdmin.remove(); }
+
+  seleccionMarcador = null;
+
+  //Mapa centrado por defecto en San Jose
+  mapaAdmin = L.map('mapa-admin-selector').setView([9.9333, -84.0833], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaAdmin);
+
+  mapaAdmin.on('click', async function(e) {
+    const latitud = e.latlng.lat;
+    const longitud = e.latlng.lng;
+
+    //LLenado automatico de los inputs latitud y longitud
+     document.getElementById('p_lat').value = latitud;
+     document.getElementById('p_lon').value = longitud;
+
+     try{
+      //Consultar a OpenStreetMap por la direccion segun la latitud y longitud del marcador de seleccion
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitud}&lon=${longitud}`);
+      const datos = await res.json();
+     
+     //Si se encuentra una direccion se coloca
+     if (datos.display_name) {
+      //Coloca solo las tres primeras partes de la direccion
+      const partes = datos.display_name.split(',');
+      const direccionCorta = partes.slice(0, 3).join(',').trim();
+      document.getElementById('paradaDescripcion').value = direccionCorta;     
+    }
+
+     } catch (error) {
+      console.log("No se pudo obtener la dirección automática.");
+     }
+
+     //Para hacerle saber al admin lo que eligio
+     if (seleccionMarcador) { seleccionMarcador.setLatLng(e.latlng); }
+     else { seleccionMarcador = L.marker(e.latlng).addTo(mapaAdmin); }
+     });
+    }
+
+
+//FUNCION para guardar la parada
+async function guardarParada(e) {
+  e.preventDefault();
+  const idRuta = document.getElementById('rutaIdParaParada').value;
+  const nombreRuta = document.getElementById('nombreRutaParada').innerText;
+
+  const datos = {
+    nombre: document.getElementById('paradaNombre').value,
+    descripcion: document.getElementById('paradaDescripcion').value, 
+    latitud: parseFloat(document.getElementById('p_lat').value),
+    longitud: parseFloat(document.getElementById('p_lon').value),
+    ruta: { id: Number(idRuta) }
+    };
+
+    const res = await fetch("http://localhost:8080/api/paradas", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(datos)
+       });
+
+       if (res.ok) {
+
+        //Limpiar el formulario
+        document.getElementById('formNuevaParada').reset();
+        
+        //Remover el marcador del mapa en caso de que exista
+        if (seleccionMarcador && mapaAdmin) {
+          mapaAdmin.removeLayer(seleccionMarcador);
+          seleccionMarcador = null;
+        }
+
+        gestionarParadas(idRuta, nombreRuta); 
+
+          Swal.fire({ title: '¡Parada registrada!', 
+            icon: 'success', 
+            timer: 1000, 
+            showConfirmButton: false,
+            target: document.getElementById('modalParadas') });
+       }
+      }
+
+//FUNCION de la pagina detalle ruta
+      function  inicializarMapaDetalleRuta(paradas){
+        if (mapaDetalle) { mapaDetalle.remove(); } //Borra el mapa viejo de la memoria
+        if (!paradas || paradas.length === 0) return; //En caso de que una ruta no tenga paradas registradas no dibuja el mapa
+
+        //Centrar el mapa en la primera parada
+        mapaDetalle = L.map('mapa-interactivo').setView([paradas[0].latitud, paradas[0].longitud], 14); //Para indicarle al usuario donde empieza su viaje
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaDetalle); //
+
+         paradas.forEach(p => {
+           L.marker([p.latitud, p.longitud])
+            .addTo(mapaDetalle)
+            .bindPopup(`<b>${p.nombre}</b><br>Punto de abordaje oficial`);
+         });
+      }
+
+
+  //FUNCION ELIMINAR PARADA
+      async function eliminarParada(idParada, idRuta, nombreRuta){
+        const resultado = await Swal.fire({
+          title: '¿Eliminar parada?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar',
+          target: document.getElementById('modalParadas')  //La alerta sale sobre el modal
+        });
+
+        if (resultado.isConfirmed) {
+          const res = await fetch(`/api/paradas/${idParada}`, { method: 'DELETE' });
+          if (res.ok) {
+            
+            await Swal.fire({ title: 'Eliminada', 
+              text: 'Parada quitada de la ruta', 
+              icon: 'success', timer: 1000, 
+              showConfirmButton: false,
+              target: document.getElementById('modalParadas')
+             });
+            gestionarParadas(idRuta, nombreRuta);
+    }
+  }
+}
+
+//Funcion para borrar cualquier sombra que haya quedado de un modal
+function forzarCierreModal() {
+  document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = 'auto';
+  document.body.style.paddingRight = '0';
+}
+
 
   //INICIALIACION
   document.addEventListener("DOMContentLoaded", function () {
@@ -923,6 +1103,19 @@ function convertirHorasAMinutos(horaString){
     if (formularioRuta) {
       formularioRuta.addEventListener('submit', guardarRuta);
     }
+
+    //Para borrar cualquier sombra negra restante
+    const modalParadas = document.getElementById('modalParadas');
+     if (modalParadas) {
+      modalParadas.addEventListener('hidden.bs.modal', function () {
+        forzarCierreModal();
+        if (mapaAdmin) {
+          mapaAdmin.remove();
+          mapaAdmin = null;
+        }
+         seleccionMarcador = null;
+      });
+    } 
 
 
     //Activar la libreria de reloj

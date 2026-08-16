@@ -10,7 +10,13 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!--Mapa-->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 </head>
+
 <body class="d-flex flex-column min-vh-100 bg-white">
 
   <!-- Header dinámico -->
@@ -124,14 +130,8 @@
       <!-- Columna Derecha (Información de la empresa y Mapa) -->
       <div class="col-lg-4">
         <div class="card rounded-xl border shadow-sm p-0 overflow-hidden mb-4">
-          <!-- Placeholder de mapa -->
-          <div class="position-relative" style="height: 200px; background: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=600') center/cover;">
-            <div class="position-absolute w-100 h-100 bg-dark bg-opacity-25 d-flex align-items-center justify-content-center">
-              <button class="btn btn-light text-primary fw-medium rounded-pill px-4 shadow-sm d-flex align-items-center gap-2">
-                <i data-lucide="map-pin" style="width:16px;"></i> Abrir mapa interactivo
-              </button>
-            </div>
-          </div>
+          <!--Mapa -->
+           <div id="mapa-interactivo" style="height: 300px;" class="rounded-4 shadow-sm border overflow-hidden mb-3"></div>
 
           <!--Espacio para informacion de TELEFONO E EMAIL-->
           <div class="p-4" id="contenedor-info-empresa">
