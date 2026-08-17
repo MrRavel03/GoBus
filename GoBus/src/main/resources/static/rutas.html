@@ -12,9 +12,6 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!--Script de las funciones del main.js-->
-  <script src="js/main.js"></script>
-
 </head>
 
 <body class="d-flex flex-column min-vh-100 bg-slate-50">
@@ -83,8 +80,8 @@
             </div>
           </div>
 
-          <button class="btn btn-light text-primary w-100 fw-medium" style="background-color: #eff6ff;">Limpiar
-            filtros</button>
+          <button id="btn-limpiar-filtros" class="btn btn-light text-primary w-100 fw-medium" style="background-color: #eff6ff;">Limpiar
+          filtros</button>
         </div>
       </aside>
 
@@ -94,7 +91,7 @@
         <!-- Buscador superior -->
         <div class="bg-white rounded-xl border mb-4 px-3 py-2 d-flex align-items-center">
           <i data-lucide="search" class="text-muted ms-2" style="width: 20px;"></i>
-          <input type="text" class="form-control border-0 shadow-none bg-transparent"
+          <input type="text" id="buscador-texto" class="form-control border-0 shadow-none bg-transparent"
             placeholder="Buscar por origen, destino o empresa...">
         </div>
 
