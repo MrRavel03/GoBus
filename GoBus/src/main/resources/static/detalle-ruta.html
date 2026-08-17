@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,9 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Librería de Alertas -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!--Mapa-->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -23,10 +27,11 @@
   <div id="header-container"></div>
 
   <main class="flex-grow-1 container-xl py-4">
-    
+
     <!-- Encabezado de Detalles -->
     <div class="mb-4">
-      <a href="rutas.html" class="text-secondary small text-decoration-none d-inline-flex align-items-center gap-1 mb-3">
+      <a href="rutas.html"
+        class="text-secondary small text-decoration-none d-inline-flex align-items-center gap-1 mb-3">
         <i data-lucide="arrow-left" style="width: 14px;"></i> Volver a resultados
       </a>
 
@@ -37,20 +42,16 @@
             <span id="detalle-tipo-ruta" class="badge-soft-primary small"></span>
 
             <!--Espacio para el encabezado del nombre de la empresa-->
-
             <span id="detalle-empresa-encabezado" class="text-primary small fw-medium"></span>
           </div>
-        
 
-      <!--Espacio para el encabezado de la ruta-->
-      <h1 class="fw-bolder text-dark mb-0 d-flex align-items-center gap-2" id="detalle-titulo-ruta">
 
-      </h1>
+          <!--Espacio para el encabezado de la ruta-->
+          <h1 class="fw-bolder text-dark mb-0 d-flex align-items-center gap-2" id="detalle-titulo-ruta"></h1>
         </div>
-        
         <button class="btn btn-outline-secondary d-flex align-items-center gap-2 fw-medium rounded-3 px-3">
-        <i data-lucide="heart" style="width: 18px;"></i> Guardar
-      </button>
+          <i data-lucide="heart" style="width: 18px;"></i> Guardar
+        </button>
       </div>
     </div>
 
@@ -58,13 +59,16 @@
     <!-- Menú de Pestañas (Tabs) -->
     <ul class="nav custom-tabs mb-4" id="rutaTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="horarios-tab" data-bs-toggle="tab" data-bs-target="#horarios" type="button" role="tab">Horarios</button>
+        <button class="nav-link active" id="horarios-tab" data-bs-toggle="tab" data-bs-target="#horarios" type="button"
+          role="tab">Horarios</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="recorrido-tab" data-bs-toggle="tab" data-bs-target="#recorrido" type="button" role="tab">Recorrido y Paradas</button>
+        <button class="nav-link" id="recorrido-tab" data-bs-toggle="tab" data-bs-target="#recorrido" type="button"
+          role="tab">Recorrido y Paradas</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tarifas-tab" data-bs-toggle="tab" data-bs-target="#tarifas" type="button" role="tab">Tarifas</button>
+        <button class="nav-link" id="tarifas-tab" data-bs-toggle="tab" data-bs-target="#tarifas" type="button"
+          role="tab">Tarifas</button>
       </li>
     </ul>
 
@@ -73,7 +77,7 @@
       <!-- Columna Izquierda (Contenido de las Pestañas) -->
       <div class="col-lg-8">
         <div class="tab-content" id="rutaTabsContent">
-          
+
           <!-- TAB 1: HORARIOS -->
           <div class="tab-pane fade show active" id="horarios" role="tabpanel">
             <div class="card rounded-xl border shadow-sm p-0 overflow-hidden">
@@ -93,13 +97,14 @@
                       <th class="py-3 fw-semibold">Frecuencia</th>
                     </tr>
                   </thead>
-                  <tbody id="tabla-horarios-cuerpo">
-                  </tbody>
+                  <tbody id="tabla-horarios-cuerpo"></tbody>
                 </table>
               </div>
-              <div class="bg-warning bg-opacity-10 p-3 m-3 rounded d-flex gap-2 align-items-start border border-warning-subtle">
+              <div
+                class="bg-warning bg-opacity-10 p-3 m-3 rounded d-flex gap-2 align-items-start border border-warning-subtle">
                 <i data-lucide="alert-circle" class="text-warning-emphasis mt-1" style="width: 18px;"></i>
-                <p class="small text-warning-emphasis mb-0">Los horarios pueden variar por condiciones climáticas, tráfico o disposiciones del CTP. Recomendamos llegar 15 minutos antes a la terminal.</p>
+                <p class="small text-warning-emphasis mb-0">Los horarios pueden variar por condiciones climáticas,
+                  tráfico o disposiciones del CTP. Recomendamos llegar 15 minutos antes a la terminal.</p>
               </div>
             </div>
           </div>
@@ -112,36 +117,65 @@
               </h5>
               <!--Espacio para la linea de tiempo-->
               <div class="detail-timeline mt-2 ms-2" id="contenedor-recorrido"></div>
-              </div>
             </div>
-          
+          </div>
+
 
           <!-- TAB 3: TARIFAS -->
           <div class="tab-pane fade" id="tarifas" role="tabpanel">
             <div class="card rounded-xl border shadow-sm p-0 overflow-hidden text-center">
-                <span class="small text-secondary fw-bold text-uppercase tracking-wider">Tarifa Regular</span>
-                <h2 class="display-3 fw-bolder text-dark mb-1 mt-2">₡0</h2>
-                <span class="small text-secondary">Aprobada por ARESEP</span>
-              </div>
+              <span class="small text-secondary fw-bold text-uppercase tracking-wider">Tarifa Regular</span>
+              <h2 class="display-3 fw-bolder text-dark mb-1 mt-2">₡0</h2>
+              <span class="small text-secondary">Aprobada por ARESEP</span>
             </div>
-          </div>
-        </div>
-
-      <!-- Columna Derecha (Información de la empresa y Mapa) -->
-      <div class="col-lg-4">
-        <div class="card rounded-xl border shadow-sm p-0 overflow-hidden mb-4">
-          <!--Mapa -->
-           <div id="mapa-interactivo" style="height: 300px;" class="rounded-4 shadow-sm border overflow-hidden mb-3"></div>
-
-          <!--Espacio para informacion de TELEFONO E EMAIL-->
-          <div class="p-4" id="contenedor-info-empresa">
-            <button class="btn btn-light w-100 fw-medium text-secondary bg-slate-50 border">Reportar un problema</button>
           </div>
         </div>
       </div>
 
+      <!-- Columna Derecha (Información de la empresa y Mapa) -->
+      <div class="col-lg-4">
+        <div class="card rounded-xl border shadow-sm p-0 overflow-hidden mb-4">
+
+          <!--Mapa -->
+          <div id="mapa-interactivo" style="height: 300px;" class="rounded-4 shadow-sm border overflow-hidden mb-3">
+          </div>
+
+          <!--Espacio para informacion de TELEFONO E EMAIL-->
+          <div class="p-4" id="contenedor-info-empresa">
+          </div>
+        </div>
+      </div>
     </div>
   </main>
+
+  <!--Modal de REPORTAR un problema-->
+  <div class="modal fade" id="modalReporte" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-0 p-4 pb-0">
+          <h5 class="fw-bold">Reportar un problema</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="small text-secondary mb-4">Ayúdanos a mantener la información actualizada.</p>
+          <form onsubmit="enviarReporte(event)" id="formReporte">
+            <div class="mb-3">
+              <label class="small fw-bold mb-1">¿Qué incidencia desea reportar?</label>
+              <select id="tipoReporte" class="form-select bg-light" required>
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Horario incorrecto">Horario incorrecto</option>
+                <option value="Tarifa desactualizada">Tarifa desactualizada</option>
+                <option value="Parada movida o inexistente">Parada movida o inexistente</option>
+                <option value="Empresa cambió de nombre">Empresa cambió de nombre</option>
+                <option value="Otro problema">Otro problema</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold">Enviar Reporte</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer dinámico -->
   <div id="footer-container"></div>
@@ -150,4 +184,5 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/main.js"></script>
 </body>
+
 </html>
