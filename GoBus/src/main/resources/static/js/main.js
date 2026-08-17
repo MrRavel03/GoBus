@@ -288,6 +288,7 @@ async function cargarUsuariosRecientes() {
     }
 
     let contenedorVacio = "";
+    let contenedorVacio='';
 
     //Cargar ultimos 3 o 5 usuarios recientemente creados
 
@@ -321,19 +322,230 @@ async function cargarUsuariosRecientes() {
 
 async function cargarRutasDesdeBackend() {
   const contenedorRutas = document.getElementById("contenedorRutas");
+// Formatea un numero como colones. Si viene null o undefined muestra 0
+// en vez de tronar con "Cannot read properties of undefined".
+function formatearColones(valor) {
+  const numero = Number(valor);
+  return "₡" + (isNaN(numero) ? 0 : numero).toLocaleString("es-CR");
+}
+
+//BUSCADOR DEL INDEX
+
+// Rellena un <select> con la lista de textos que venga del backend.
+function llenarSelect(elemento, opciones, textoPorDefecto) {
+  elemento.innerHTML = `<option value="">${textoPorDefecto}</option>`;
+
+  opciones.forEach(function (opcion) {
+    const item = document.createElement("option");
+    item.value = opcion;
+    item.textContent = opcion;
+    elemento.appendChild(item);
+  });
+}
+
+// Pide al backend los origenes y destinos que existen en la base
+// y los carga en los dos select del buscador de index.html.
+function cargarOpcionesBusqueda() {
+  const selectOrigen = document.getElementById("select-origen");
+  const selectDestino = document.getElementById("select-destino");
+
+  if (!selectOrigen || !selectDestino) {
+    return;
+  }
+
+  fetch("/api/rutas/origenes")
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (origenes) {
+      llenarSelect(selectOrigen, origenes, "Origen");
+    })
+    .catch(function (error) {
+      console.error("Error al cargar los origenes:", error);
+      selectOrigen.innerHTML = '<option value="">Origen no disponible</option>';
+    });
+
+  fetch("/api/rutas/destinos")
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (destinos) {
+      llenarSelect(selectDestino, destinos, "Destino");
+    })
+    .catch(function (error) {
+      console.error("Error al cargar los destinos:", error);
+      selectDestino.innerHTML = '<option value="">Destino no disponible</option>';
+    });
+}
+
+// Al enviar el buscador, lleva al usuario a rutas.html con lo que eligio.
+function activarBusqueda() {
+  const formulario = document.getElementById("formulario-busqueda");
+
+  if (!formulario) {
+    return;
+  }
+
+  formulario.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const origen = document.getElementById("select-origen").value;
+    const destino = document.getElementById("select-destino").value;
+
+    const parametros = new URLSearchParams();
+    if (origen) parametros.set("origen", origen);
+    if (destino) parametros.set("destino", destino);
+
+    window.location.href = "rutas.html?" + parametros.toString();
+  });
+}
+
+
+// Imagenes por defecto segun el origen de la ruta.
+// Si el origen no coincide con ninguna, se usa la imagen "default".
+const IMAGENES_POR_ORIGEN = {
+  "san jose": "https://www.geckoroutes.com/images/wp-uploads/2021/10/Aerial-view-of-Costa-Ricas-San-Jose-city.jpg",
+  "alajuela": "https://costarica.org/wp-content/uploads/2014/12/Alajuela-Building1.jpg",
+  "heredia": "https://media.licdn.com/dms/image/v2/D4E12AQH8SKQDWor_kg/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1685067618225?e=2147483647&v=beta&t=oeppYclxfvpdzasfmjpxHMexONIh4HOb7n4X5l2lIDk",
+  "cartago": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaE_tmCJP22O6_1VPiT3T0YLbDwt-iOcdeJzvlS2TKlfRoTNDybGjDhqE&s=10",
+  "default": "https://img.magnific.com/vector-gratis/ubicacion-pin-ruta-bandera_78370-4270.jpg?semt=ais_hybrid&w=740&q=80"
+};
+
+// Quita tildes y pasa a minusculas para poder comparar "San Jose" con "san jose".
+function normalizarTexto(texto) {
+  return (texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+// Busca en IMAGENES_POR_ORIGEN una clave que este contenida en el origen de la ruta.
+function obtenerImagenPorOrigen(origen) {
+  const origenNormalizado = normalizarTexto(origen);
+
+  for (const clave in IMAGENES_POR_ORIGEN) {
+    if (clave !== "default" && origenNormalizado.includes(clave)) {
+      return IMAGENES_POR_ORIGEN[clave];
+    }
+  }
+  return IMAGENES_POR_ORIGEN["default"];
+}
+
+// Devuelve una copia del arreglo mezclada al azar (Fisher-Yates).
+function mezclarArreglo(arreglo) {
+  const copia = [...arreglo];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+}
+
+// Carga 3 rutas al azar desde el backend y las pinta en index.html
+function cargarRutasDestacadas() {
+  const contenedor = document.getElementById("contenedor-rutas-destacadas");
+
+  if (!contenedor) {
+    return;
+  }
+
+  fetch("/api/rutas")
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("El servidor respondio " + response.status);
+      }
+      return response.json();
+    })
+    .then(function (rutas) {
+      if (!Array.isArray(rutas) || rutas.length === 0) {
+        contenedor.innerHTML = `<p class="text-center text-secondary">No hay rutas destacadas por ahora.</p>`;
+        return;
+      }
+
+      const rutasElegidas = mezclarArreglo(rutas).slice(0, 3);
+
+      let html = "";
+
+      rutasElegidas.forEach(function (ruta) {
+        const imagen = obtenerImagenPorOrigen(ruta.origen);
+
+        html += `
+          <div class="col">
+            <a href="detalle-ruta.html?id=${ruta.id}" class="text-decoration-none">
+              <div class="card h-100 card-route border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="position-relative">
+                  <img src="${imagen}" class="card-img-top"
+                    style="height: 220px; object-fit: cover; width: 100%;" alt="${ruta.destino}">
+                  <div class="position-absolute top-0 end-0 m-3">
+                    <span class="badge bg-white text-dark rounded-pill px-3 py-2 shadow-sm fs-6">${formatearColones(ruta.tarifa)}</span>
+                  </div>
+                </div>
+                <div class="card-body p-4">
+                  <h5 class="card-title fw-bold mb-1">${ruta.origen} - ${ruta.destino}</h5>
+                  <p class="card-text text-muted small mb-3">${ruta.empresa}</p>
+                  <div class="d-flex gap-3 small text-secondary">
+                    <span class="d-flex align-items-center gap-1"><i data-lucide="clock" style="width:16px;"></i> ${ruta.frecuencia || "N/D"}</span>
+                    <span class="d-flex align-items-center gap-1"><i data-lucide="map-pin" style="width:16px;"></i> ${ruta.tipo || "Directo"}</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+      });
+
+      contenedor.innerHTML = html;
+
+      if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+      }
+    })
+    .catch(function (error) {
+      console.error("Error al cargar las rutas destacadas:", error);
+      contenedor.innerHTML = `<p class="text-center text-danger">No se pudieron cargar las rutas destacadas.</p>`;
+    });
+}
+
+function cargarRutasDesdeBackend() {
+  const contenedorRutas = document.getElementById("contenedor-rutas");
 
   if (!contenedorRutas) {
     return;
   }
-  fetch("/api/rutas")
+
+  // Si venimos del buscador del index, respetamos el filtro de la URL
+  const filtros = new URLSearchParams(window.location.search);
+  const parametros = new URLSearchParams();
+  if (filtros.get("origen")) parametros.set("origen", filtros.get("origen"));
+  if (filtros.get("destino")) parametros.set("destino", filtros.get("destino"));
+
+  const url = parametros.toString()
+    ? "/api/rutas?" + parametros.toString()
+    : "/api/rutas";
+
+  fetch(url)
     .then(function (response) {
+      if (!response.ok) {
+        throw new Error("El servidor respondio " + response.status);
+      }
       return response.json();
     })
     .then(function (rutas) {
-      contenedorRutas.innerHTML = "";
+      if (!Array.isArray(rutas) || rutas.length === 0) {
+        const huboFiltro = parametros.toString() !== "";
+        contenedorRutas.innerHTML = `
+          <div class="text-center text-secondary py-5">
+            ${huboFiltro
+              ? "No hay rutas que coincidan con tu busqueda."
+              : "No hay rutas registradas todavia."}
+          </div>`;
+        return;
+      }
+
+      let html = "";
 
       rutas.forEach(function (ruta) {
-        const rutaHTML = `
+        html += `
           <a href="detalle-ruta.html?id=${ruta.id}" class="route-card p-4">
             <div class="row align-items-center">
               <div class="col-8 col-md-9">
@@ -352,7 +564,7 @@ async function cargarRutasDesdeBackend() {
                 <span class="text-secondary small d-flex align-items-center gap-1 mb-2">
                   <i data-lucide="clock" style="width:14px;"></i> ${ruta.frecuencia}
                 </span>
-                <span class="fs-4 fw-bolder text-dark mb-2">₡${ruta.tarifa.toLocaleString("es-CR")}</span>
+                <span class="fs-4 fw-bolder text-dark mb-2">${formatearColones(ruta.tarifa)}</span>
                 <div class="btn-round-arrow">
                   <i data-lucide="chevron-right" style="width: 20px;"></i>
                 </div>
@@ -360,9 +572,9 @@ async function cargarRutasDesdeBackend() {
             </div>
           </a>
         `;
-
-        contenedorRutas.innerHTML += rutaHTML;
       });
+
+      contenedorRutas.innerHTML = html;
 
       if (typeof lucide !== "undefined") {
         lucide.createIcons();
@@ -370,6 +582,10 @@ async function cargarRutasDesdeBackend() {
     })
     .catch(function (error) {
       console.error("Error al cargar las rutas:", error);
+      contenedorRutas.innerHTML = `
+        <div class="text-center text-danger py-5">
+          No se pudieron cargar las rutas. Revisa que el servidor este corriendo.
+        </div>`;
     });
 }
 
@@ -385,6 +601,9 @@ function cargarDetalleRutaDesdeBackend() {
 
   fetch(`/api/rutas/${idRuta}`)
     .then(function (response) {
+      if (!response.ok) {
+        throw new Error("No se encontro la ruta " + idRuta);
+      }
       return response.json();
     })
     .then(function (ruta) {
@@ -396,12 +615,13 @@ function cargarDetalleRutaDesdeBackend() {
 }
 
 function actualizarDetalleRuta(ruta) {
-  //SECCION 1: Encabezado y titulos
+  // Encabezado principal: San José -> Liberia
   const tituloRuta = document.querySelector("h1.fw-bolder");
 
   if (tituloRuta) {
-    tituloRuta.innerHTML = `${ruta.origen} 
-    <i data-lucide="arrow-right" class="text-muted" style="width: 24px;"></i> 
+    tituloRuta.innerHTML = `
+      ${ruta.origen} 
+      <i data-lucide="arrow-right" class="text-muted" style="width: 24px;"></i> 
       ${ruta.destino}
     `;
   }
@@ -434,6 +654,23 @@ function actualizarDetalleRuta(ruta) {
 
     ruta.horarios.forEach((horario) => {
       horarios += `
+  const tipoRuta = document.querySelector(".badge-soft-primary");
+
+  if (tipoRuta) {
+    tipoRuta.textContent = ruta.tipo;
+  }
+  const empresaRuta = document.querySelector(".text-primary.small.fw-medium");
+  if (empresaRuta) {
+    empresaRuta.textContent = ruta.empresa;
+  }
+  // Tabla de horarios
+  const tablaHorarios = document.querySelector("#horarios tbody");
+
+  if (tablaHorarios && ruta.horarios && ruta.horarios.length > 0) {
+    tablaHorarios.innerHTML = "";
+
+    ruta.horarios.forEach(function (horario) {
+      tablaHorarios.innerHTML += `
         <tr class="border-bottom">
           <td class="ps-4 py-3 fw-medium text-dark">${horario.dia}</td>
           <td class="py-3 text-secondary">${horario.primerServicio}</td>
@@ -445,12 +682,18 @@ function actualizarDetalleRuta(ruta) {
   }
 
   //SECCION 3: Recorrido y paradas
+          <td class="py-3 text-dark small">${horario.frecuencia}</td>
+        </tr>
+      `;
+    });
+  }
+  // Recorrido y paradas
   const recorrido = document.querySelector(".detail-timeline");
 
-  if (recorrido && ruta.paradas) {
-    let htmlParadas = "";
+  if (recorrido && ruta.paradas && ruta.paradas.length > 0) {
+    recorrido.innerHTML = "";
 
-    ruta.paradas.forEach((parada, index) => {
+    ruta.paradas.forEach(function (parada, index) {
       let claseDot = "";
 
       if (index === 0) {
@@ -469,13 +712,22 @@ function actualizarDetalleRuta(ruta) {
   }
 
   //SECCION 4: Tarifa y empresa
+      recorrido.innerHTML += `
+        <div class="detail-timeline-item">
+          <div class="detail-timeline-dot ${claseDot}"></div>
+          <h6 class="fw-bold text-dark mb-1">${parada.nombre}</h6>
+          <p class="small text-secondary mb-0">${parada.descripcion}</p>
+        </div>
+      `;
+    });
+  }
+
   // Tarifa principal
   const tarifaPrincipal = document.querySelector("#tarifas h2");
 
   if (tarifaPrincipal) {
-    tarifaPrincipal.textContent = `₡${(ruta.tarifa || 0).toLocaleString("es-CR")}`;
+    tarifaPrincipal.textContent = formatearColones(ruta.tarifa);
   }
-
   // Información de empresa
   const infoEmpresa = document.querySelector(".col-lg-4 .p-4");
 
@@ -489,6 +741,17 @@ function actualizarDetalleRuta(ruta) {
       <button class="btn btn-light w-100 fw-medium text-secondary bg-slate-50 border" 
         data-bs-toggle="modal" 
         data-bs-target="#modalReporte">
+      <div class="small text-secondary mb-2">
+        <strong class="text-dark">Nombre:</strong> ${ruta.empresa}
+      </div>
+      <div class="small text-secondary mb-2">
+        <strong class="text-dark">Teléfono:</strong> ${ruta.telefono}
+      </div>
+      <div class="small text-secondary mb-4">
+        <strong class="text-dark">Email:</strong> ${ruta.email}
+      </div>
+
+      <button class="btn btn-light w-100 fw-medium text-secondary bg-slate-50 border">
         Reportar un problema
         </button>
     `;
@@ -1098,6 +1361,9 @@ async function enviarReporte(e) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datosReporte),
     });
+}
+
+
 
     if (res.ok) {
       //Cerrar el modal primero
@@ -1320,4 +1586,31 @@ document.addEventListener("DOMContentLoaded", function () {
       minuteIncrement: 15,
     });
   }
+    //Cargar header
+    cargarPlantillas();
+
+    //Registro
+    crearCuenta();
+
+    //Login
+    iniciarSesion();
+
+    //Boton contrasena
+    verContrasena('#togglePassword', '#password');
+
+    //Cargar usuarios recientes en el panel de admin
+    cargarUsuariosRecientes();
+
+    //Buscador del index (selects de origen y destino)
+    cargarOpcionesBusqueda();
+    activarBusqueda();
+
+    //Cargar datos de rutas
+    cargarRutasDesdeBackend();
+    cargarDetalleRutaDesdeBackend();
+
+    //Cargar rutas destacadas al azar en index.html
+    cargarRutasDestacadas();
+
+
 });
