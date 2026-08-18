@@ -38,10 +38,6 @@ public class Ruta {
 
     @JsonIgnoreProperties("ruta")
     @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Tarifa> tarifas;
-
-    @JsonIgnoreProperties("ruta")
-    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Parada> paradas;
 
     @JsonIgnoreProperties("ruta")
@@ -83,9 +79,6 @@ public class Ruta {
 
     public List<Horario> getHorarios() {return horarios;}
     public void setHorarios(List<Horario> horarios) {this.horarios = horarios;}
-
-    public List<Tarifa> getTarifas() {return tarifas;}
-    public void setTarifas(List<Tarifa> tarifas) {this.tarifas = tarifas;}
 
     public List<Parada> getParadas() {return paradas;}
     public void setParadas(List<Parada> paradas) {this.paradas = paradas;}

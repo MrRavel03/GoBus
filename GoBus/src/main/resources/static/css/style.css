@@ -328,6 +328,53 @@ html {
   border-color: #3b82f6;
 }
 
+/* Botón de favorito (corazón) sobre la tarjeta de ruta */
+.route-card {
+  position: relative;
+}
+
+.btn-favorito {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: none;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.btn-favorito:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.btn-favorito.activo {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.btn-favorito.activo i {
+  fill: currentColor;
+}
+
+/* Boton de favorito (con texto) en la pagina de detalle de ruta */
+.btn-favorito-detalle.activo {
+  background-color: #fee2e2;
+  border-color: #fecaca;
+  color: #ef4444;
+}
+
+.btn-favorito-detalle.activo i {
+  fill: currentColor;
+}
+
 /* Línea de tiempo para Recorrido y Paradas */
 .detail-timeline {
   position: relative;
