@@ -509,10 +509,10 @@ function cargarRutasDestacadas() {
 }
 
 // Guarda todas las rutas descargadas del backend, para filtrar en memoria sin volver a pedirlas
-var todasLasRutas = [];
+let todasLasRutas = [];
 
 // Mapeo de provincia -> palabras clave a buscar dentro del texto de "origen"
-var PROVINCIA_POR_ORIGEN = {
+const PROVINCIA_POR_ORIGEN = {
   "p-sanjose": ["san jose"],
   "p-alajuela": ["alajuela"],
   "p-cartago": ["cartago"],
@@ -523,18 +523,10 @@ var PROVINCIA_POR_ORIGEN = {
 };
 
 // Mapeo de checkbox de tipo -> valor real que se guarda en la columna "tipo"
-var TIPO_POR_CHECKBOX = {
+const TIPO_POR_CHECKBOX = {
   "ts-urbano": "Urbano",
   "ts-interurbano": "Interurbano",
 };
-
-
-// Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
-// Estado de la paginacion
-var RUTAS_POR_PAGINA = 3;
-var paginaActual = 1;
-var rutasActualmentefiltradas = [];
-
 function cargarRutasDesdeBackend() {
   const contenedorRutas = document.getElementById("contenedor-rutas");
 
@@ -574,6 +566,11 @@ function cargarRutasDesdeBackend() {
     });
 }
 
+// Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
+// Estado de la paginacion
+const RUTAS_POR_PAGINA = 3;
+let paginaActual = 1;
+let rutasActualmentefiltradas = [];
 
 // Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
 function pintarRutas(rutas) {
@@ -588,19 +585,16 @@ function pintarRutas(rutas) {
         No hay rutas que coincidan con tu busqueda.
       </div>`;
     pintarPaginacion();
-    if (typeof lucide !== "undefined") lucide.createIcons();
     return;
   }
 
-
   // Si la pagina actual quedo fuera de rango (ej. tras filtrar), la regresamos a la 1
-   const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
+  const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
   if (paginaActual > totalPaginas) paginaActual = 1;
   if (paginaActual < 1) paginaActual = 1;
 
-    const inicio = (paginaActual - 1) * RUTAS_POR_PAGINA;
-    const fin = inicio + RUTAS_POR_PAGINA;
-    const rutasDeEstaPagina = rutasActualmentefiltradas.slice(inicio, fin);
+  const inicio = (paginaActual - 1) * RUTAS_POR_PAGINA;
+  const rutasDeEstaPagina = rutasActualmentefiltradas.slice(inicio, inicio + RUTAS_POR_PAGINA);
 
   let html = "";
 
@@ -694,10 +688,10 @@ function activarPaginacion() {
     const valor = link.getAttribute("data-pagina");
     const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
 
-     if (valor === "ant") {
-      if (paginaActual > 1) paginaActual--; 
+    if (valor === "ant") {
+      if (paginaActual > 1) paginaActual--;
     } else if (valor === "sig") {
-      if (paginaActual < totalPaginas) paginaActual++;  
+      if (paginaActual < totalPaginas) paginaActual++;
     } else {
       paginaActual = parseInt(valor, 10);
     }
@@ -872,7 +866,7 @@ function actualizarDetalleRuta(ruta) {
   const recorrido = document.querySelector(".detail-timeline");
 
   if (recorrido && ruta.paradas && ruta.paradas.length > 0) {
-    recorrido.innerHTML = "";
+    let htmlParadas = "";
 
     ruta.paradas.forEach(function (parada, index) {
       let claseDot = "";

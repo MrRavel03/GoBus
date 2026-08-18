@@ -387,6 +387,8 @@ html {
 
 #contenedor-rutas {
   scroll-margin-top: 200px;
+#contenedor-rutas {
+  scroll-margin-top: 200px;
 }
 
 /*Popover del comentario del usuario*/
@@ -405,4 +407,3 @@ html {
   background-color: rgba(0, 0, 0, 0.02);
   border-radius: 8px;
 }
-  
