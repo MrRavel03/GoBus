@@ -819,12 +819,13 @@ function cargarDetalleRutaDesdeBackend() {
 }
 
 function actualizarDetalleRuta(ruta) {
-  //SECCION 1: Encabezado y titulos
+  // Encabezado principal: San José -> Liberia
   const tituloRuta = document.querySelector("h1.fw-bolder");
 
   if (tituloRuta) {
-    tituloRuta.innerHTML = `${ruta.origen} 
-    <i data-lucide="arrow-right" class="text-muted" style="width: 24px;"></i> 
+    tituloRuta.innerHTML = `
+      ${ruta.origen} 
+      <i data-lucide="arrow-right" class="text-muted" style="width: 24px;"></i> 
       ${ruta.destino}
     `;
   }
@@ -870,10 +871,10 @@ function actualizarDetalleRuta(ruta) {
   //SECCION 3: Recorrido y paradas
   const recorrido = document.querySelector(".detail-timeline");
 
-  if (recorrido && ruta.paradas) {
-    let htmlParadas = "";
+  if (recorrido && ruta.paradas && ruta.paradas.length > 0) {
+    recorrido.innerHTML = "";
 
-    ruta.paradas.forEach((parada, index) => {
+    ruta.paradas.forEach(function (parada, index) {
       let claseDot = "";
 
       if (index === 0) {
@@ -898,9 +899,8 @@ function actualizarDetalleRuta(ruta) {
   const tarifaPrincipal = document.querySelector("#tarifas h2");
 
   if (tarifaPrincipal) {
-    tarifaPrincipal.textContent = `₡${(ruta.tarifa || 0).toLocaleString("es-CR")}`;
+    tarifaPrincipal.textContent = formatearColones(ruta.tarifa);
   }
-
   // Información de empresa
   const infoEmpresa = document.querySelector(".col-lg-4 .p-4");
 
