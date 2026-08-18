@@ -1,4 +1,5 @@
 // js/main.js
+const API_BASE = "http://localhost:8080";
 async function cargarPlantillas() {
   try {
     // 1. Cargar el Header
@@ -28,44 +29,54 @@ async function cargarPlantillas() {
   }
 }
 
-function actualizarHeaderInterfaz() {
-  const loggeado = localStorage.getItem("loggeado") === "true";
-  const rol = localStorage.getItem("usuarioRol");
+function actualizarHeaderInterfaz(){
+  const loggeado= localStorage.getItem('loggeado')==='true';
+  const rol= localStorage.getItem('usuarioRol');
 
-  const linkAdmin = document.getElementById("link-admin-header");
-  const botonSesion = document.getElementById("btn-sesion-header");
+  const linkAdmin= document.getElementById('link-admin-header');
+  const botonSesion= document.getElementById('btn-sesion-header');
+  const linkFavoritos = document.getElementById('link-favoritos-header'); // <-- nueva
 
-  if (loggeado) {
-    if (linkAdmin) {
-      linkAdmin.style.display = rol === "ADMIN" ? "inline" : "none";
+  if (loggeado){
+    if (linkAdmin){
+      linkAdmin.style.display=(rol==='ADMIN')?'inline':'none';
     }
 
-    if (botonSesion) {
-      botonSesion.innerHTML =
-        '<i data-lucide="log-out" class="nav-icon"></i> Salir';
-      botonSesion.href = "#";
+    if (linkFavoritos){          // <-- nuevo bloque
+      linkFavoritos.style.display = 'block';
+    }
+
+    if (botonSesion){
+      botonSesion.innerHTML='<i data-lucide="log-out" class="nav-icon"></i> Salir';
+      botonSesion.href="#";
 
       botonSesion.onclick = (e) => {
         e.preventDefault();
         cerrarSesion();
       };
     }
-  } else {
-    if (linkAdmin) {
-      linkAdmin.style.display = "none";
+    }else{
+
+      if (linkAdmin){
+      linkAdmin.style.display = 'none';
     }
 
-    if (botonSesion) {
-      botonSesion.innerHTML =
-        '<i data-lucide="log-in" class="nav-icon"></i> Ingresar';
-      botonSesion.classList.replace("btn-outline-danger", "btn-outline-light");
-      botonSesion.href = "login.html";
-      botonSesion.onclick = null;
+    if (linkFavoritos){          // <-- nuevo bloque
+      linkFavoritos.style.display = 'none';
     }
+
+    if (botonSesion){
+      botonSesion.innerHTML='<i data-lucide="log-in" class="nav-icon"></i> Ingresar';
+      botonSesion.classList.replace('btn-outline-danger', 'btn-outline-light')
+      botonSesion.href="login.html";
+      botonSesion.onclick=null;
+    }
+    }
+
+    if (typeof lucide!=="undefined") lucide.createIcons();
+
+
   }
-
-  if (typeof lucide !== "undefined") lucide.createIcons();
-}
 
 // Función para resaltar la página actual en el menú
 function marcarMenuActivo() {
@@ -209,12 +220,13 @@ function iniciarSesion() {
 
         //Verificar si se pudo completar la accion correctamente
 
-        if (respuesta.ok) {
+        if (respuesta.ok){
           const usuario = await respuesta.json();
 
-          localStorage.setItem("usuarioNombre", usuario.nombre);
-          localStorage.setItem("usuarioRol", usuario.rol);
-          localStorage.setItem("loggeado", "true");
+          localStorage.setItem('usuarioId', usuario.id);
+          localStorage.setItem('usuarioNombre', usuario.nombre);
+          localStorage.setItem('usuarioRol', usuario.rol);
+          localStorage.setItem('loggeado', 'true');
 
           Swal.fire({
             title: "¡Bienvenido!",
@@ -544,26 +556,30 @@ function cargarRutasDesdeBackend() {
     ? "/api/rutas?" + parametros.toString()
     : "/api/rutas";
 
-  fetch(url)
-    .then(function (response) {
-      if (!response.ok) {
-        throw new Error("El servidor respondio " + response.status);
-      }
-      return response.json();
-    })
-    .then(function (rutas) {
-      todasLasRutas = Array.isArray(rutas) ? rutas : [];
-      pintarRutas(todasLasRutas);
-      activarFiltros();
-      activarPaginacion();
-    })
-    .catch(function (error) {
-      console.error("Error al cargar las rutas:", error);
-      contenedorRutas.innerHTML = `
-        <div class="text-center text-danger py-5">
-          No se pudieron cargar las rutas. Revisa que el servidor este corriendo.
-        </div>`;
-    });
+  
+  cargarFavoritosDelUsuario().then(function () {
+   
+    fetch(url)
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("El servidor respondio " + response.status);
+        }
+        return response.json();
+      })
+      .then(function (rutas) {
+        todasLasRutas = Array.isArray(rutas) ? rutas : [];
+        pintarRutas(todasLasRutas);      
+        activarFiltros();
+        activarPaginacion();
+      })
+      .catch(function (error) {
+        console.error("Error al cargar las rutas:", error);
+        contenedorRutas.innerHTML = `
+          <div class="text-center text-danger py-5">
+            No se pudieron cargar las rutas. Revisa que el servidor este corriendo.
+          </div>`;
+      });
+  });
 }
 
 // Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
@@ -599,32 +615,39 @@ function pintarRutas(rutas) {
   let html = "";
 
   rutasDeEstaPagina.forEach(function (ruta) {
+    const esFavorito = idsRutasFavoritas.has(ruta.id);
+
     html += `
-      <a href="detalle-ruta.html?id=${ruta.id}" class="route-card p-4">
-        <div class="row align-items-center">
-          <div class="col-8 col-md-9">
-            <div class="d-flex align-items-center gap-2 mb-3">
-              <span class="badge-soft-primary small">${ruta.tipo}</span>
-              <span class="text-secondary small fw-medium">• ${ruta.empresa}</span>
+      <div class="route-card p-4 position-relative">
+        <button type="button" class="btn-favorito position-absolute z-3" style="top: 1.5rem; right: 1.5rem; background: none; border: none; padding: 0;" data-id-ruta="${ruta.id}">
+          <i data-lucide="heart" style="width:20px;" ${esFavorito ? 'fill="#dc3545" stroke="#dc3545"' : ''}></i>
+        </button>
+        <a href="detalle-ruta.html?id=${ruta.id}" class="text-decoration-none text-dark">
+          <div class="row align-items-center">
+            <div class="col-8 col-md-9">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge-soft-primary small">${ruta.tipo}</span>
+                <span class="text-secondary small fw-medium">• ${ruta.empresa}</span>
+              </div>
+              <div class="route-path">
+                <div class="route-dot start"></div>
+                <h6 class="fw-bold text-dark mb-3">${ruta.origen}</h6>
+                <div class="route-dot end"></div>
+                <h6 class="fw-bold text-dark mb-0">${ruta.destino}</h6>
+              </div>
             </div>
-            <div class="route-path">
-              <div class="route-dot start"></div>
-              <h6 class="fw-bold text-dark mb-3">${ruta.origen}</h6>
-              <div class="route-dot end"></div>
-              <h6 class="fw-bold text-dark mb-0">${ruta.destino}</h6>
+            <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
+              <span class="text-secondary small d-flex align-items-center gap-1 mb-2 me-4 pe-2 mt-1">
+                <i data-lucide="clock" style="width:14px;"></i> ${ruta.frecuencia}
+              </span>
+              <span class="fs-4 fw-bolder text-dark mb-2 mt-2">${formatearColones(ruta.tarifa)}</span>
+              <div class="btn-round-arrow">
+                <i data-lucide="chevron-right" style="width: 20px;"></i>
+              </div>
             </div>
           </div>
-          <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
-            <span class="text-secondary small d-flex align-items-center gap-1 mb-2">
-              <i data-lucide="clock" style="width:14px;"></i> ${ruta.frecuencia}
-            </span>
-            <span class="fs-4 fw-bolder text-dark mb-2">${formatearColones(ruta.tarifa)}</span>
-            <div class="btn-round-arrow">
-              <i data-lucide="chevron-right" style="width: 20px;"></i>
-            </div>
-          </div>
-        </div>
-      </a>
+        </a>
+      </div>
     `;
   });
 
@@ -633,6 +656,17 @@ function pintarRutas(rutas) {
   if (typeof lucide !== "undefined") {
     lucide.createIcons();
   }
+  
+  document.querySelectorAll("#contenedor-rutas .btn-favorito").forEach(function (boton) {
+    boton.addEventListener("click", function (e) {
+      e.preventDefault(); 
+      const idRuta = Number(boton.getAttribute("data-id-ruta"));
+      
+      alternarFavorito(idRuta, boton, function(esFavoritoAhora) {
+
+      });
+    });
+  });
 
   pintarPaginacion();
 }
@@ -701,6 +735,110 @@ function activarPaginacion() {
     // Sube la vista al inicio del listado al cambiar de pagina
     document.getElementById("contenedor-rutas").scrollIntoView({ behavior: "smooth", block: "start" });
   });
+}
+
+// FAVORITOS
+
+function obtenerUsuarioIdLogueado() {
+  const loggeado = localStorage.getItem('loggeado') === 'true';
+  const usuarioId = localStorage.getItem('usuarioId');
+  return (loggeado && usuarioId) ? Number(usuarioId) : null;
+}
+
+// Guarda en memoria el set de ids de rutas que el usuario ya tiene en favoritos
+let idsRutasFavoritas = new Set();
+
+function cargarFavoritosDelUsuario() {
+  const usuarioId = obtenerUsuarioIdLogueado();
+  if (!usuarioId) {
+    idsRutasFavoritas = new Set();
+    return Promise.resolve();
+  }
+
+  return fetch(`${API_BASE}/favoritos/usuario/${usuarioId}`)
+    .then(function (response) {
+      if (!response.ok) throw new Error("No se pudieron cargar los favoritos");
+      return response.json();
+    })
+    .then(function (favoritos) {
+      idsRutasFavoritas = new Set(favoritos.map(function (fav) { return fav.ruta.id; }));
+    })
+    .catch(function (error) {
+      console.error("Error al cargar favoritos:", error);
+      idsRutasFavoritas = new Set();
+    });
+}
+
+function alternarFavorito(idRuta, botonCorazon, onCambio) {
+  const usuarioId = obtenerUsuarioIdLogueado();
+
+  if (!usuarioId) {
+    Swal.fire({
+      title: 'Inicia sesion',
+      text: 'Debes iniciar sesion para guardar rutas favoritas',
+      icon: 'info',
+      confirmButtonColor: '#0d6efd'
+    });
+    return;
+  }
+
+  const yaEsFavorito = idsRutasFavoritas.has(idRuta);
+
+  if (yaEsFavorito) {
+    fetch(`${API_BASE}/favoritos/usuario/${usuarioId}/ruta/${idRuta}`, { method: "DELETE" })
+      .then(function (response) {
+        if (!response.ok) throw new Error("No se pudo quitar el favorito");
+        idsRutasFavoritas.delete(idRuta);
+        actualizarIconoFavorito(botonCorazon, false);
+        if (typeof onCambio === "function") onCambio(false);
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
+  } else {
+    fetch(`${API_BASE}/favoritos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        usuario: { id: usuarioId },
+        ruta: { id: idRuta }
+      })
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("No se pudo guardar el favorito");
+        idsRutasFavoritas.add(idRuta);
+        actualizarIconoFavorito(botonCorazon, true);
+        if (typeof onCambio === "function") onCambio(true);
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
+  }
+}
+
+function actualizarIconoFavorito(botonCorazon, esFavorito) {
+  if (!botonCorazon) return;
+  botonCorazon.innerHTML = esFavorito
+    ? '<i data-lucide="heart" style="width:18px;" fill="#dc3545" stroke="#dc3545"></i>'
+    : '<i data-lucide="heart" style="width:18px;"></i>';
+  if (typeof lucide !== "undefined") lucide.createIcons();
+}
+
+function pintarEstadoBotonFavorito(boton, textoSpan, esFavorito) {
+  const icono = boton.querySelector('[data-lucide="heart"]');
+  if (icono) {
+    if (esFavorito) {
+      icono.setAttribute("fill", "#dc3545");
+      icono.setAttribute("stroke", "#dc3545");
+    } else {
+      icono.removeAttribute("fill");
+      icono.setAttribute("stroke", "currentColor");
+    }
+  }
+  if (textoSpan) {
+    textoSpan.textContent = esFavorito ? "Guardado" : "Guardar";
+  }
+  if (typeof lucide !== "undefined") lucide.createIcons();
 }
 
 // Revisa el estado de checkboxes + texto de busqueda, filtra en memoria y vuelve a pintar
@@ -797,19 +935,21 @@ function cargarDetalleRutaDesdeBackend() {
   const parametros = new URLSearchParams(window.location.search);
   const idRuta = parametros.get("id") || 1;
 
-  fetch(`/api/rutas/${idRuta}`)
-    .then(function (response) {
-      if (!response.ok) {
-        throw new Error("No se encontro la ruta " + idRuta);
-      }
-      return response.json();
-    })
-    .then(function (ruta) {
-      actualizarDetalleRuta(ruta);
-    })
-    .catch(function (error) {
-      console.error("Error al cargar el detalle de la ruta:", error);
-    });
+  cargarFavoritosDelUsuario().then(function () {
+    fetch(`${API_BASE}/api/rutas/${idRuta}`)
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("No se encontro la ruta " + idRuta);
+        }
+        return response.json();
+      })
+      .then(function (ruta) {
+        actualizarDetalleRuta(ruta);
+      })
+      .catch(function (error) {
+        console.error("Error al cargar el detalle de la ruta:", error);
+      });
+  });
 }
 
 function actualizarDetalleRuta(ruta) {
@@ -912,6 +1052,21 @@ function actualizarDetalleRuta(ruta) {
         </button>
     `;
   }
+    // Boton de favorito
+  const botonFavorito = document.getElementById("btn-favorito-detalle");
+  const textoFavorito = document.getElementById("texto-favorito-detalle");
+
+  if (botonFavorito) {
+    const yaEsFavorito = idsRutasFavoritas.has(ruta.id);
+    pintarEstadoBotonFavorito(botonFavorito, textoFavorito, yaEsFavorito);
+
+    botonFavorito.onclick = function () {
+      alternarFavorito(ruta.id, null, function (esFavoritoAhora) {
+        pintarEstadoBotonFavorito(botonFavorito, textoFavorito, esFavoritoAhora);
+      });
+    };
+  }
+
   if (typeof lucide !== "undefined") {
     lucide.createIcons();
   }
@@ -1772,6 +1927,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //Cargar los datos de reportes
     cargarReportes(),
+    
+    //Cargar los datos de favoritos
+    cargarPaginaFavoritos(),
   ]).then(() => {
     console.log("Datos dinamicos cargados");
   });
@@ -1851,3 +2009,112 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+
+// FAVORITOS - pagina dedicada
+function cargarPaginaFavoritos() {
+  const contenedor = document.getElementById("contenedor-favoritos");
+  if (!contenedor) return;
+
+  const usuarioId = obtenerUsuarioIdLogueado();
+
+  if (!usuarioId) {
+    contenedor.innerHTML = `
+      <div class="text-center text-secondary py-5">
+        <p class="mb-3">Debes iniciar sesion para ver tus rutas favoritas.</p>
+        <a href="login.html" class="btn btn-auth-primary">Iniciar sesion</a>
+      </div>`;
+    return;
+  }
+
+  fetch(`${API_BASE}/favoritos/usuario/${usuarioId}`)
+    .then(function (response) {
+      if (!response.ok) throw new Error("No se pudieron cargar los favoritos");
+      return response.json();
+    })
+    .then(function (favoritos) {
+      idsRutasFavoritas = new Set(favoritos.map(function (fav) { return fav.ruta.id; }));
+      pintarTarjetasFavoritos(favoritos);
+    })
+    .catch(function (error) {
+      console.error("Error al cargar favoritos:", error);
+      contenedor.innerHTML = `
+        <div class="text-center text-danger py-5">
+          No se pudieron cargar tus favoritos. Revisa que el servidor este corriendo.
+        </div>`;
+    });
+}
+
+function pintarTarjetasFavoritos(favoritos) {
+  const contenedor = document.getElementById("contenedor-favoritos");
+  if (!contenedor) return;
+
+  if (!Array.isArray(favoritos) || favoritos.length === 0) {
+    contenedor.innerHTML = `
+      <div class="text-center text-secondary py-5">
+        Aun no tienes rutas guardadas como favoritas.
+      </div>`;
+    return;
+  }
+
+  let html = "";
+
+  favoritos.forEach(function (favorito) {
+    const ruta = favorito.ruta;
+    html += `
+      <div class="route-card p-4 position-relative">
+        <button type="button" class="btn-favorito position-absolute z-3" style="top: 1.5rem; right: 1.5rem; background: none; border: none; padding: 0;" data-id-ruta="${ruta.id}">
+          <i data-lucide="heart" style="width:20px;" fill="#dc3545" stroke="#dc3545"></i>
+        </button>
+        <a href="detalle-ruta.html?id=${ruta.id}" class="text-decoration-none text-dark">
+          <div class="row align-items-center">
+            <div class="col-8 col-md-9">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge-soft-primary small">${ruta.tipo}</span>
+                <span class="text-secondary small fw-medium">• ${ruta.empresa}</span>
+              </div>
+              <div class="route-path">
+                <div class="route-dot start"></div>
+                <h6 class="fw-bold text-dark mb-3">${ruta.origen}</h6>
+                <div class="route-dot end"></div>
+                <h6 class="fw-bold text-dark mb-0">${ruta.destino}</h6>
+              </div>
+            </div>
+            <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
+              <span class="text-secondary small d-flex align-items-center gap-1 mb-2 me-4 pe-2 mt-1">
+                <i data-lucide="clock" style="width:14px;"></i> ${ruta.frecuencia}
+              </span>
+              <span class="fs-4 fw-bolder text-dark mb-2 mt-2">${formatearColones(ruta.tarifa)}</span>
+              <div class="btn-round-arrow">
+                <i data-lucide="chevron-right" style="width: 20px;"></i>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    `;
+  });
+
+  contenedor.innerHTML = html;
+
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+
+  document.querySelectorAll("#contenedor-favoritos .btn-favorito").forEach(function (boton) {
+    boton.addEventListener("click", function (e) {
+      e.preventDefault();
+      const idRuta = Number(boton.getAttribute("data-id-ruta"));
+      const tarjeta = boton.closest(".route-card");
+
+      alternarFavorito(idRuta, boton, function (esFavoritoAhora) {
+        if (!esFavoritoAhora && tarjeta) {
+          tarjeta.remove();
+          if (document.querySelectorAll("#contenedor-favoritos .route-card").length === 0) {
+            pintarTarjetasFavoritos([]);
+          }
+        }
+      });
+    });
+  });
+}
