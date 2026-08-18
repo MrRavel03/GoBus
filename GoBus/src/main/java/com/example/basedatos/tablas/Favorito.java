@@ -8,8 +8,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Favorito {
 
     @Id
@@ -19,11 +21,15 @@ public class Favorito {
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
+    @JsonIgnoreProperties("favoritos")
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_ruta", nullable = false)
+    @JsonIgnoreProperties("favoritos")
     private Ruta ruta;
+
+    public Favorito() {}
 
     public long getId() {
         return id;

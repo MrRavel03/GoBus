@@ -1,8 +1,9 @@
 package com.example.basedatos.repositorios;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.basedatos.tablas.Favorito;
-import java.util.List;
 import java.util.Optional;
 
 public interface FavoritoRepositorio extends JpaRepository<Favorito, Long> {

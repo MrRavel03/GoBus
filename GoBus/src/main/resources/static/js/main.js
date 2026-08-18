@@ -34,21 +34,27 @@ function actualizarHeaderInterfaz(){
   const rol= localStorage.getItem('usuarioRol');
 
   const linkAdmin= document.getElementById('link-admin-header');
+  const linkFavoritos = document.getElementById('link-favoritos-header');
   const botonSesion= document.getElementById('btn-sesion-header');
-  const linkFavoritos = document.getElementById('link-favoritos-header'); // <-- nueva
+  const linkPerfil = document.getElementById("link-perfil-header");
 
   if (loggeado){
     if (linkAdmin){
       linkAdmin.style.display=(rol==='ADMIN')?'inline':'none';
     }
 
-    if (linkFavoritos){          // <-- nuevo bloque
+    if (linkFavoritos){     
       linkFavoritos.style.display = 'block';
     }
 
-    if (botonSesion){
-      botonSesion.innerHTML='<i data-lucide="log-out" class="nav-icon"></i> Salir';
-      botonSesion.href="#";
+    if (linkPerfil) {
+      linkPerfil.style.display = "inline";
+    }
+
+    if (botonSesion) {
+      botonSesion.innerHTML =
+        '<i data-lucide="log-out" class="nav-icon"></i> Salir';
+      botonSesion.href = "#";
 
       botonSesion.onclick = (e) => {
         e.preventDefault();
@@ -61,8 +67,20 @@ function actualizarHeaderInterfaz(){
       linkAdmin.style.display = 'none';
     }
 
-    if (linkFavoritos){          // <-- nuevo bloque
+    if (linkFavoritos){        
       linkFavoritos.style.display = 'none';
+    }
+
+    if (linkPerfil) {
+      linkPerfil.style.display = "none";
+    }
+
+    if (botonSesion) {
+      botonSesion.innerHTML =
+        '<i data-lucide="log-in" class="nav-icon"></i> Ingresar';
+      botonSesion.classList.replace("btn-outline-danger", "btn-outline-light");
+      botonSesion.href = "login.html";
+      botonSesion.onclick = null;
     }
 
     if (botonSesion){
@@ -71,7 +89,7 @@ function actualizarHeaderInterfaz(){
       botonSesion.href="login.html";
       botonSesion.onclick=null;
     }
-    }
+    
 
     if (typeof lucide!=="undefined") lucide.createIcons();
 
@@ -155,7 +173,7 @@ function crearCuenta() {
 
       try {
         //Peticion hacia el servidor
-        const respuesta = await fetch("http://localhost:8080/usuarios", {
+        const respuesta = await fetch("/usuarios", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -210,7 +228,7 @@ function iniciarSesion() {
 
       try {
         //Peticion hacia el servidor
-        const respuesta = await fetch("http://localhost:8080/usuarios/login", {
+        const respuesta = await fetch("/usuarios/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -223,10 +241,11 @@ function iniciarSesion() {
         if (respuesta.ok){
           const usuario = await respuesta.json();
 
-          localStorage.setItem('usuarioId', usuario.id);
-          localStorage.setItem('usuarioNombre', usuario.nombre);
-          localStorage.setItem('usuarioRol', usuario.rol);
-          localStorage.setItem('loggeado', 'true');
+          localStorage.setItem("usuarioId", usuario.id);
+          localStorage.setItem("usuarioNombre", usuario.nombre);
+          localStorage.setItem("usuarioCorreo", usuario.correo);
+          localStorage.setItem("usuarioRol", usuario.rol);
+          localStorage.setItem("loggeado", "true");
 
           Swal.fire({
             title: "¡Bienvenido!",
@@ -284,7 +303,7 @@ async function cargarUsuariosRecientes() {
   if (!contenedorUsuarios) return;
 
   try {
-    const respuesta = await fetch("http://localhost:8080/usuarios");
+    const respuesta = await fetch("/usuarios");
     const usuarios = await respuesta.json();
 
     //En caso de que no haya usuarios registrados recientemente
@@ -402,11 +421,213 @@ function activarBusqueda() {
     const origen = document.getElementById("select-origen").value;
     const destino = document.getElementById("select-destino").value;
 
+    //Guardar la busqueda en el historial del usuario logueado (si hay uno)
+    registrarBusqueda(origen, destino);
+
     const parametros = new URLSearchParams();
     if (origen) parametros.set("origen", origen);
     if (destino) parametros.set("destino", destino);
 
     window.location.href = "rutas.html?" + parametros.toString();
+  });
+}
+
+// Guarda la busqueda en el historial del usuario logueado. No bloquea la redireccion si falla.
+function registrarBusqueda(origen, destino) {
+  const idUsuario = localStorage.getItem("usuarioId");
+  if (!idUsuario || (!origen && !destino)) return;
+
+  fetch("/api/historial", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      origen: origen,
+      destino: destino,
+      usuario: { id: Number(idUsuario) },
+    }),
+  }).catch(function (error) {
+    console.error("Error al registrar la busqueda:", error);
+  });
+}
+
+//PERFIL DE USUARIO (Favoritos + Historial de busquedas)
+
+// Punto de entrada de perfil.html: valida sesion y carga los datos del usuario
+function cargarPerfil() {
+  const contenedorAvatar = document.getElementById("perfil-avatar");
+  if (!contenedorAvatar) return;
+
+  const idUsuario = localStorage.getItem("usuarioId");
+  const nombre = localStorage.getItem("usuarioNombre");
+
+  if (!idUsuario) {
+    Swal.fire({
+      title: "Inicia sesion",
+      text: "Necesitas una cuenta para ver tu perfil",
+      icon: "info",
+      confirmButtonColor: "#0d6efd",
+    }).then(() => {
+      window.location.href = "login.html";
+    });
+    return;
+  }
+
+  const iniciales = nombre
+    ? nombre.trim().split(/\s+/).slice(0, 2).map((palabra) => palabra[0].toUpperCase()).join("")
+    : "?";
+
+  contenedorAvatar.textContent = iniciales;
+  document.getElementById("perfil-nombre").textContent = nombre || "Usuario";
+  document.getElementById("perfil-correo").textContent = localStorage.getItem("usuarioCorreo") || "";
+
+  const botonSalir = document.getElementById("btn-cerrar-sesion-perfil");
+  if (botonSalir) {
+    botonSalir.addEventListener("click", function (e) {
+      e.preventDefault();
+      cerrarSesion();
+    });
+  }
+
+  const botonLimpiarHistorial = document.getElementById("btn-limpiar-historial");
+  if (botonLimpiarHistorial) {
+    botonLimpiarHistorial.addEventListener("click", limpiarHistorialPerfil);
+  }
+
+  cargarFavoritosPerfil(idUsuario);
+  cargarHistorialPerfil(idUsuario);
+}
+
+// Trae y pinta las rutas favoritas del usuario en perfil.html
+async function cargarFavoritosPerfil(idUsuario) {
+  const contenedor = document.getElementById("contenedor-perfil-favoritos");
+  if (!contenedor) return;
+
+  try {
+    const respuesta = await fetch(`/favoritos/usuario/${idUsuario}`);
+    const favoritos = await respuesta.json();
+
+    if (favoritos.length === 0) {
+      contenedor.innerHTML = `
+        <div class="col-12">
+          <a href="rutas.html" class="btn-dashed w-100 d-flex flex-column align-items-center justify-content-center text-secondary py-5">
+            <i data-lucide="plus-circle" style="width:32px; height:32px;" class="mb-2 text-muted"></i>
+            <span class="fw-medium small">Aun no tienes rutas favoritas, buscá una</span>
+          </a>
+        </div>`;
+      if (typeof lucide !== "undefined") lucide.createIcons();
+      return;
+    }
+
+    let html = "";
+    favoritos.forEach(function (favorito) {
+      const ruta = favorito.ruta;
+      html += `
+        <div class="col">
+          <div class="card h-100 rounded-xl border shadow-sm p-3 position-relative">
+            <button type="button" class="btn btn-link text-secondary position-absolute top-0 end-0 p-3 shadow-none border-0 btn-quitar-favorito-perfil" data-favorito-id="${favorito.id}" title="Quitar de favoritos">
+              <i data-lucide="trash-2" style="width:18px;"></i>
+            </button>
+            <div class="mb-3"><span class="badge-soft-primary small">${ruta.tipo}</span></div>
+            <h5 class="fw-bold text-dark d-flex align-items-center gap-2">${ruta.origen} <i data-lucide="arrow-right" class="text-muted" style="width:16px;"></i> ${ruta.destino}</h5>
+            <p class="small text-secondary mb-4">${ruta.empresa}</p>
+            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+              <span class="fs-5 fw-bold text-dark">${formatearColones(ruta.tarifa)}</span>
+              <a href="detalle-ruta.html?id=${ruta.id}" class="text-decoration-none small fw-bold d-flex align-items-center gap-1">Ver horarios <i data-lucide="chevron-right" style="width:16px;"></i></a>
+            </div>
+          </div>
+        </div>`;
+    });
+
+    contenedor.innerHTML = html;
+    if (typeof lucide !== "undefined") lucide.createIcons();
+
+    contenedor.querySelectorAll(".btn-quitar-favorito-perfil").forEach(function (boton) {
+      boton.addEventListener("click", async function () {
+        await fetch(`/favoritos/${boton.dataset.favoritoId}`, { method: "DELETE" });
+        cargarFavoritosPerfil(idUsuario);
+      });
+    });
+  } catch (error) {
+    console.error("Error al cargar los favoritos del perfil:", error);
+  }
+}
+
+// Trae y pinta el historial de busquedas del usuario en perfil.html
+async function cargarHistorialPerfil(idUsuario) {
+  const contenedor = document.getElementById("contenedor-perfil-historial");
+  if (!contenedor) return;
+
+  try {
+    const respuesta = await fetch(`/api/historial/usuario/${idUsuario}`);
+    const historial = await respuesta.json();
+
+    if (historial.length === 0) {
+      contenedor.innerHTML = `<p class="text-secondary small text-center py-5 mb-0">Aun no has hecho ninguna busqueda.</p>`;
+      return;
+    }
+
+    let html = "";
+    historial.forEach(function (busqueda) {
+      const fecha = busqueda.fecha
+        ? new Date(busqueda.fecha).toLocaleString("es-CR", { dateStyle: "medium", timeStyle: "short" })
+        : "";
+
+      html += `
+        <div class="bg-white border rounded-xl p-3 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;">
+              <i data-lucide="history" style="width:16px;"></i>
+            </div>
+            <div>
+              <p class="fw-medium text-dark mb-0 small">${busqueda.origen || "Cualquier origen"} <i data-lucide="arrow-right" class="text-muted" style="width:14px;"></i> ${busqueda.destino || "Cualquier destino"}</p>
+              <p class="text-secondary mb-0" style="font-size: 0.75rem;">${fecha}</p>
+            </div>
+          </div>
+          <button type="button" class="btn btn-link text-secondary shadow-none border-0 btn-borrar-busqueda" data-busqueda-id="${busqueda.id}" title="Borrar del historial">
+            <i data-lucide="x" style="width:18px;"></i>
+          </button>
+        </div>`;
+    });
+
+    contenedor.innerHTML = html;
+    if (typeof lucide !== "undefined") lucide.createIcons();
+
+    contenedor.querySelectorAll(".btn-borrar-busqueda").forEach(function (boton) {
+      boton.addEventListener("click", async function () {
+        await fetch(`/api/historial/${boton.dataset.busquedaId}`, { method: "DELETE" });
+        cargarHistorialPerfil(idUsuario);
+      });
+    });
+  } catch (error) {
+    console.error("Error al cargar el historial del perfil:", error);
+  }
+}
+
+// Borra todo el historial de busquedas del usuario, pidiendo confirmacion primero
+function limpiarHistorialPerfil() {
+  const idUsuario = localStorage.getItem("usuarioId");
+  if (!idUsuario) return;
+
+  Swal.fire({
+    title: "¿Limpiar historial?",
+    text: "Se van a borrar todas tus busquedas guardadas",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#dc3545",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Si, limpiar",
+    cancelButtonText: "Cancelar",
+  }).then(async (resultado) => {
+    if (!resultado.isConfirmed) return;
+
+    const respuesta = await fetch(`/api/historial/usuario/${idUsuario}`);
+    const historial = await respuesta.json();
+
+    await Promise.all(
+      historial.map((busqueda) => fetch(`/api/historial/${busqueda.id}`, { method: "DELETE" })),
+    );
+
+    cargarHistorialPerfil(idUsuario);
   });
 }
 
@@ -587,6 +808,9 @@ function cargarRutasDesdeBackend() {
 const RUTAS_POR_PAGINA = 3;
 let paginaActual = 1;
 let rutasActualmentefiltradas = [];
+
+// Favoritos del usuario logueado: { idRuta: idFavorito }, para saber que corazon pintar lleno
+let favoritosDelUsuario = {};
 
 // Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
 function pintarRutas(rutas) {
@@ -969,6 +1193,13 @@ function actualizarDetalleRuta(ruta) {
   document.querySelector(".text-primary.small.fw-medium").textContent =
     ruta.empresa;
 
+  // Boton de favorito ("Guardar"): guarda el id de la ruta y refleja si ya es favorita
+  const botonFavoritoDetalle = document.getElementById("btn-favorito-detalle");
+  if (botonFavoritoDetalle) {
+    botonFavoritoDetalle.dataset.rutaId = ruta.id;
+    sincronizarBotonFavoritoDetalle();
+  }
+
   //SECCION 1.1: Estado de la ruta (Activa/ En revision)
   const badgeEstado = document.getElementById("badge-estado-servicio");
   if (badgeEstado) {
@@ -1155,12 +1386,12 @@ async function guardarRuta(e) {
   };
 
   //Definir el metodo, si es editar o crear
-  let url = "http://localhost:8080/api/rutas";
+  let url = "/api/rutas";
   let metodo = "POST";
 
   //Editar ruta
   if (idRuta && idRuta.trim() !== "") {
-    url = `http://localhost:8080/api/rutas/${idRuta}`;
+    url = `/api/rutas/${idRuta}`;
     metodo = "PUT";
     datosRuta.id = parseInt(idRuta, 10);
   }
@@ -1383,7 +1614,7 @@ async function guardarHorario(e) {
   };
 
   try {
-    const respuesta = await fetch("http://localhost:8080/api/horarios", {
+    const respuesta = await fetch("/api/horarios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datosHorarios),
@@ -1566,7 +1797,7 @@ async function guardarParada(e) {
     ruta: { id: Number(idRuta) },
   };
 
-  const res = await fetch("http://localhost:8080/api/paradas", {
+  const res = await fetch("/api/paradas", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(datos),
@@ -1689,7 +1920,7 @@ async function enviarReporte(e) {
   };
 
   try {
-    const res = await fetch("http://localhost:8080/api/reportes", {
+    const res = await fetch("/api/reportes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datosReporte),
@@ -1737,7 +1968,7 @@ async function cargarReportes() {
   if (!contenedor) return;
 
   try {
-    const res = await fetch("http://localhost:8080/api/reportes");
+    const res = await fetch("/api/reportes");
     const reportes = await res.json();
 
     let html = "";
@@ -1775,7 +2006,7 @@ async function cargarReportes() {
 
 async function abrirHistorialReportes() {
   try {
-    const response = await fetch("http://localhost:8080/api/reportes");
+    const response = await fetch("/api/reportes");
     const reportes = await response.json();
     const tablaBody = document.querySelector("#tabla-todos-reportes tbody");
 
@@ -1856,7 +2087,7 @@ const popoverList = [...popoverTriggerList].map(el => new bootstrap.Popover(el))
 async function cambiarEstadoReporte(id) {
   try {
     const res = await fetch(
-      `http://localhost:8080/api/reportes/${id}/revisado`,
+      `/api/reportes/${id}/revisado`,
       {
         method: "PUT",
       },
@@ -1918,6 +2149,9 @@ document.addEventListener("DOMContentLoaded", function () {
     cargarRutasDesdeBackend(),
     cargarDetalleRutaDesdeBackend(),
 
+    //Cargar los favoritos del usuario logueado, para pintar los corazones
+    cargarFavoritosDelUsuario(),
+
     //Buscador del index (selects de origen y destino)
     cargarOpcionesBusqueda(),
     activarBusqueda(),
@@ -1941,6 +2175,15 @@ document.addEventListener("DOMContentLoaded", function () {
   iniciarSesion();
   //Boton contrasena
   verContrasena("#togglePassword", "#password");
+
+  //Corazones de favoritos en las tarjetas de rutas
+  activarFavoritos();
+
+  //Boton "Guardar" de favorito en detalle-ruta.html
+  activarFavoritoDetalle();
+
+  //Carga de perfil.html (favoritos + historial de busquedas), no hace nada en las demas paginas
+  cargarPerfil();
 
   //Guardar/editar ruta en el modal, para que el evento submit ya este conectado a la funcion
   const formularioRuta = document.getElementById("formularioRuta");
@@ -2117,4 +2360,4 @@ function pintarTarjetasFavoritos(favoritos) {
       });
     });
   });
-}
+}}

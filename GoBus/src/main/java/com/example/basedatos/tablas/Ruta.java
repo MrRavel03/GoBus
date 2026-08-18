@@ -38,10 +38,6 @@ public class Ruta {
 
     @JsonIgnoreProperties("ruta")
     @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Tarifa> tarifas;
-
-    @JsonIgnoreProperties("ruta")
-    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Parada> paradas;
 
     public Long getId() {
@@ -130,14 +126,6 @@ public class Ruta {
 
     public void setHorarios(List<Horario> horarios) {
         this.horarios = horarios;
-    }
-
-    public List<Tarifa> getTarifas() {
-        return tarifas;
-    }
-
-    public void setTarifas(List<Tarifa> tarifas) {
-        this.tarifas = tarifas;
     }
 
     public List<Parada> getParadas() {

@@ -13,7 +13,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/favoritos")
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE})
-
 public class FavoritoControlador {
 
     @Autowired
@@ -25,7 +24,7 @@ public class FavoritoControlador {
         return repositorioFavorito.findAll();
     }
 
-    // Favoritos de un usuario especifico
+    /** Favoritos de un usuario especifico, para pintarlos en su perfil. */
     @GetMapping("/usuario/{idUsuario}")
     public List<Favorito> consultarFavoritosDeUsuario(@PathVariable Long idUsuario){
         return repositorioFavorito.findByUsuarioId(idUsuario);
@@ -35,8 +34,8 @@ public class FavoritoControlador {
     @PostMapping
     public ResponseEntity<Favorito> crearFavoritos(@RequestBody Favorito favorito){
         boolean yaExiste = repositorioFavorito.existsByUsuarioIdAndRutaId(
-            favorito.getUsuario().getId(),
-            favorito.getRuta().getId()
+                favorito.getUsuario().getId(),
+                favorito.getRuta().getId()
         );
 
         if (yaExiste) {
@@ -47,9 +46,19 @@ public class FavoritoControlador {
         return ResponseEntity.ok(guardado);
     }
 
+    // Metodo BORRAR por ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarFavorito(@PathVariable Long id){
+        if (!repositorioFavorito.existsById(id)){
+            return ResponseEntity.notFound().build();
+        }
+        repositorioFavorito.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
     // Quitar favorito por usuario + ruta 
     @DeleteMapping("/usuario/{idUsuario}/ruta/{idRuta}")
-    public ResponseEntity<Void> eliminarFavorito(@PathVariable Long idUsuario, @PathVariable Long idRuta){
+    public ResponseEntity<Void> eliminarFavoritoPorUsuarioYRuta(@PathVariable Long idUsuario, @PathVariable Long idRuta){
         Optional<Favorito> favorito = repositorioFavorito.findByUsuarioIdAndRutaId(idUsuario, idRuta);
 
         if (favorito.isEmpty()) {

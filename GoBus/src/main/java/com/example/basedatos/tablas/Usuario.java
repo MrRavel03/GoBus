@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
@@ -72,6 +73,7 @@ public class Usuario {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "usuario")
+    @JsonIgnoreProperties("usuario")
     private List<Favorito> favoritos;
 
     public List<Favorito> getFavoritos() {
