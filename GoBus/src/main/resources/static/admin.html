@@ -15,12 +15,12 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <!--3: CSS personalizado-->
-   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 
-   <!--4: MOTORES DE ICONOS Y MAPAS-->
-   <script src="https://unpkg.com/lucide@latest"></script>
-   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!--4: MOTORES DE ICONOS Y MAPAS-->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
 
@@ -128,27 +128,22 @@
         </table>
       </div>
     </div>
-    <div class="row g-4">
+
+    <!--REPORTES-->
+    <div class="row g-4 mb-4">
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm rounded-4 h-100">
           <div class="card-header bg-white border-0 p-4">
             <h5 class="fw-bold mb-1">Reportes recientes</h5>
             <p class="small text-secondary mb-0">Problemas reportados por los usuarios.</p>
           </div>
-          <div class="list-group list-group-flush">
-            <div class="list-group-item p-4">
-              <h6 class="fw-bold mb-1">Horario incorrecto</h6>
-              <p class="small text-secondary mb-1">Ruta San José - Cartago</p>
-              <span class="badge bg-warning bg-opacity-10 text-warning">Pendiente</span>
-            </div>
-            <div class="list-group-item p-4">
-              <h6 class="fw-bold mb-1">Tarifa desactualizada</h6>
-              <p class="small text-secondary mb-1">Ruta Heredia - San José</p>
-              <span class="badge bg-success bg-opacity-10 text-success">Revisado</span>
-            </div>
+          <div id="contenedor-reportes-recientes" class="list-group list-group-flush">
           </div>
+          <button class="btn btn-link btn-sm text-decoration-none" onclick="abrirHistorialReportes()">Ver todos</button>
         </div>
       </div>
+
+      <!--USUARIOS-->
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm rounded-4 h-100">
           <div class="card-header bg-white border-0 p-4">
@@ -156,15 +151,14 @@
             <p class="small text-secondary mb-0">Últimas cuentas registradas en la plataforma.</p>
           </div>
           <div id="contenedor-usuarios-recientes" class="list-group list-group-flush">
-            <div class="list-group-item p-4 d-flex justify-content-between align-items-center">
-            </div>
+            <div class="list-group-item p-4 d-flex justify-content-between align-items-center"></div>
           </div>
         </div>
       </div>
     </div>
 
 
-    <!--Formulario para agregar una ruta-->
+    <!--Formulario para agregar una RUTA-->
     <div class="modal fade" id="modalRuta" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
@@ -196,14 +190,16 @@
 
               <div class="row">
                 <div class="col-6 mb-3">
-                <label class="form-label small fw-medium">Telefono Empresa</label>
-                <input type="text" id="telefonoEmpresa" class="form-control bg-light" placeholder="2222-2222" required>
-              </div>
+                  <label class="form-label small fw-medium">Telefono Empresa</label>
+                  <input type="text" id="telefonoEmpresa" class="form-control bg-light" placeholder="2222-2222"
+                    required>
+                </div>
 
-               <div class="col-6 mb-3">
-                <label class="form-label small fw-medium">Email Empresa</label>
-                <input type="text" id="emailEmpresa" class="form-control bg-light" placeholder="contacto@empresa.com" required>
-              </div>
+                <div class="col-6 mb-3">
+                  <label class="form-label small fw-medium">Email Empresa</label>
+                  <input type="text" id="emailEmpresa" class="form-control bg-light" placeholder="contacto@empresa.com"
+                    required>
+                </div>
               </div>
 
               <div class="row">
@@ -218,33 +214,32 @@
                 </div>
               </div>
 
-                <div class="row">
-                  <div class="col-6 mb-3">
-                    <label class="form-label small fw-medium">Tipo</label>
-                    <select id="tipo" class="form-select bg-light" required>
-                      <option value="Urbano">Urbano</option>
-                      <option value="Interurbano">Interurbano</option>
-                    </select>
-                  </div>
-
-                  <div class="col-6 mb-3">
-                    <label class="form-label small fw-medium">Estado</label>
-                    <select id="estado" class="form-select bg-light" required>
-                      <option value="Activa">Activa</option>
-                      <option value="En revisión">En revisión</option>
-                    </select>
-                  </div>
+              <div class="row">
+                <div class="col-6 mb-3">
+                  <label class="form-label small fw-medium">Tipo</label>
+                  <select id="tipo" class="form-select bg-light" required>
+                    <option value="Urbano">Urbano</option>
+                    <option value="Interurbano">Interurbano</option>
+                  </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 rounded-pill mt-3">Guardar Ruta</button>
+                <div class="col-6 mb-3">
+                  <label class="form-label small fw-medium">Estado</label>
+                  <select id="estado" class="form-select bg-light" required>
+                    <option value="Activa">Activa</option>
+                    <option value="En revisión">En revisión</option>
+                  </select>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100 rounded-pill mt-3">Guardar Ruta</button>
             </form>
           </div>
         </div>
       </div>
     </div>
 
-    <!--Formulario para gestion de horarios-->
-
+    <!--Formulario para gestion de HORARIOS-->
     <div class="modal fade" id="modalHorarios" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
@@ -254,121 +249,151 @@
           </div>
           <div class="modal-body p-4">
 
-          <!--Formulario para agregar horarios-->
-            <form onsubmit="guardarHorario(event)" id="formularioNuevoHorario" class="row g-3 mb-4 p-3 bg-light rounded-3 align-items-end w-100 m-0">
+            <!--Formulario para agregar horarios-->
+            <form onsubmit="guardarHorario(event)" id="formularioNuevoHorario"
+              class="row g-3 mb-4 p-3 bg-light rounded-3 align-items-end w-100 m-0">
               <input type="hidden" id="rutaIdDestino">
 
               <!--DIA-->
-                <div class="col-md-3">
-                  <label class="small fw-bold form-label mb-1">Día</label>
-                     <select id="horarioDia" class="form-select form-select-sm" required>
-                      <option value="Lunes a Viernes">Lunes a Viernes</option>
-                      <option value="Sábados">Sábados</option>
-                      <option value="Domingos y Feriados">Domingos y Feriados</option>
-                    </select>
-                  </div>
+              <div class="col-md-3">
+                <label class="small fw-bold form-label mb-1">Día</label>
+                <select id="horarioDia" class="form-select form-select-sm" required>
+                  <option value="Lunes a Viernes">Lunes a Viernes</option>
+                  <option value="Sábados">Sábados</option>
+                  <option value="Domingos y Feriados">Domingos y Feriados</option>
+                </select>
+              </div>
 
-                  <!--PRIMER SERVICIO-->
-                  <div class="col-md-3">
-                  <label class="small fw-bold form-label mb-1">Primer servicio</label>
-                  <input type="text" id="horarioInicio" class="form-control form-control-sm reloj-pro" placeholder="Seleccionar hora" required>                
+              <!--PRIMER SERVICIO-->
+              <div class="col-md-3">
+                <label class="small fw-bold form-label mb-1">Primer servicio</label>
+                <input type="text" id="horarioInicio" class="form-control form-control-sm reloj-pro"
+                  placeholder="Seleccionar hora" required>
+              </div>
+
+              <!--ULTIMO SERVICIO-->
+              <div class="col-md-3">
+                <label class="small fw-bold form-label mb-1">Último Servicio</label>
+                <input type="text" id="horarioFin" class="form-control form-control-sm reloj-pro"
+                  placeholder="Seleccionar hora" required>
+              </div>
+
+              <!--FRECUENCIA-->
+              <div class="col-md-3">
+                <label for="horarioFrecuenciaNum" class="small fw-bold form-label mb-1">Frecuencia</label>
+
+                <div class="input-group input-group-sm">
+                  <input type="number" class="form-control" id="horarioFrecuenciaNum" placeholder="Ej. 10" min="1"
+                    step="1" required style="flex: 0 0 40%;">
+
+                  <select class="form-select pe-4" id="horarioFrecuenciaUnidad" style="flex: 1 1 60%;">
+                    <option value="min">minuto(s)</option>
+                    <option value="hr">hora(s)</option>
+                  </select>
                 </div>
+              </div>
 
-                <!--ULTIMO SERVICIO-->
-                <div class="col-md-3">
-                  <label class="small fw-bold form-label mb-1">Último Servicio</label>
-                  <input type="text" id="horarioFin" class="form-control form-control-sm reloj-pro" placeholder="Seleccionar hora" required>                
-                </div>
-
-                <!--FRECUENCIA-->
-                <div class="col-md-3"> 
-                  <label for="horarioFrecuenciaNum" class="small fw-bold form-label mb-1">Frecuencia</label>
-
-                  <div class="input-group input-group-sm">
-                    <input 
-                    type="number" 
-                    class="form-control" 
-                    id="horarioFrecuenciaNum"
-                    placeholder="Ej. 10" 
-                    min="1" 
-                    step="1"
-                    required
-                    style="flex: 0 0 40%;"
-                    > 
-
-                    <select class="form-select pe-4" id="horarioFrecuenciaUnidad" style="flex: 1 1 60%;">
-                      <option value="min">minuto(s)</option>
-                      <option value="hr">hora(s)</option>
-                      </select>
-                    </div>
-                </div>
-
-                <!--BOTON AGREGAR-->
-                <div class="col-12 mt-3">
+              <!--BOTON AGREGAR-->
+              <div class="col-12 mt-3">
                 <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Agregar</button>
               </div>
             </form>
 
             <!--Lista de los horarios actuales-->
             <h6 class="fw-bold mb-3">Horarios registrados</h6>
-             <div id="listaHorariosRuta" class="list-group w-100"></div>
-             </div>
+            <div id="listaHorariosRuta" class="list-group w-100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--Formulario para la gestion de PARADAS, el admin solo hace click en el mapa y escribe el nombre de la parada-->
+    <div class="modal fade" id="modalParadas" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header border-0 p-4 pb-0">
+            <h5 class="fw-bold">Gestión de Recorrido: <span id="nombreRutaParada" class="text-primary"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+
+            <!--MAPA SELECTOR-->
+            <div id="mapa-admin-selector" style="height: 300px;" class="rounded-4 mb-3 border shadow-sm"></div>
+            <p class="small text-secondary mb-3 text-center"><i data-lucide="mouse-pointer-2" style="width:14px;"></i>
+              Haga clic en el mapa para capturar las coordenadas</p>
+
+            <!--FORMULARIO DE CAPTURA-->
+            <form onsubmit="guardarParada(event)" id="formNuevaParada"
+              class="row g-2 mb-4 p-3 bg-light rounded-3 border">
+              <input type="hidden" id="rutaIdParaParada">
+              <div class="col-md-5">
+                <label class="small fw-bold">Nombre de la Parada</label>
+                <input type="text" id="paradaNombre" class="form-control form-control-sm"
+                  placeholder="Ej: Terminal San José" required>
+              </div>
+
+              <!--DIRECCION O DESCRIPCION-->
+              <div class="col-md-12 mb-2">
+                <label class="small fw-bold">Referencia o Dirección</label>
+                <input type="text" id="paradaDescripcion" class="form-control form-control-sm"
+                  placeholder="Ej: Av 10, Calle 5 y 7. Contiguo a la Iglesia.">
+              </div>
+
+              <!--Los inputs de latitud y longitud tienen reandoly lo que significa que solo se llenaran cuando el admin toque el mapa-->
+              <div class="col-md-3">
+                <label class="small fw-bold">Latitud</label>
+                <input type="text" id="p_lat" class="form-control form-control-sm bg-white"
+                  placeholder="Haga clic en el mapa" readonly required>
+              </div>
+              <div class="col-md-3">
+                <label class="small fw-bold">Longitud</label>
+                <input type="text" id="p_lon" class="form-control form-control-sm bg-white"
+                  placeholder="Haga clic en el mapa" readonly required>
+              </div>
+
+              <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i data-lucide="plus"></i></button>
+              </div>
+            </form>
+
+            <!--Lista de las paradas actuales-->
+            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+              <i data-lucide="list"></i> Paradas del trayecto
+            </h6>
+            <div id="listaParadasRuta" class="list-group list-group-flush border rounded-3 overflow-y-auto"
+              style="max-height: 200px;">
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-             <!--Formulario para la gestion de PARADAS, el admin solo hace click en el mapa y escribe el nombre de la parada-->
-             <div class="modal fade" id="modalParadas" tabindex="-1" aria-hidden="true">
-              <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg rounded-4">
-                  <div class="modal-header border-0 p-4 pb-0">
-                    <h5 class="fw-bold">Gestión de Recorrido: <span id="nombreRutaParada" class="text-primary"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-4">
+    <!--Modal para el historial de reportes-->
+    <div class="modal fade" id="modalHistorialReportes" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> 
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header border-0 p-4 pb-0">
+            <h5 class="fw-bold">Historial de Reportes</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4" style="max-height: 70vh;"> 
+            <div class="table-responsive">
+              <table class="table table-hover align-middle" id="tabla-todos-reportes">
+                <thead class="table-light">
+                  <tr class="text-secondary small">
+                    <th style="width: 15%;" class="ps-4">Fecha</th>
+                     <th style="width: 60%;">Incidencia y Ruta</th>
+                    <th style="width: 25%;" class="text-end pe-5">Estado</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-                      <!--MAPA SELECTOR-->
-                      <div id="mapa-admin-selector" style="height: 300px;" class="rounded-4 mb-3 border shadow-sm"></div>
-                      <p class="small text-secondary mb-3 text-center"><i data-lucide="mouse-pointer-2" style="width:14px;"></i> Haga clic en el mapa para capturar las coordenadas</p>
-
-                      <!--FORMULARIO DE CAPTURA-->
-                      <form onsubmit="guardarParada(event)" id="formNuevaParada" class="row g-2 mb-4 p-3 bg-light rounded-3 border">
-                        <input type="hidden" id="rutaIdParaParada">
-                         <div class="col-md-5">
-                           <label class="small fw-bold">Nombre de la Parada</label>
-                           <input type="text" id="paradaNombre" class="form-control form-control-sm" placeholder="Ej: Terminal San José" required>
-                         </div>
-
-                         <!--DIRECCION O DESCRIPCION-->
-                         <div class="col-md-12 mb-2">
-                          <label class="small fw-bold">Referencia o Dirección</label>
-                          <input type="text" id="paradaDescripcion" class="form-control form-control-sm" placeholder="Ej: Av 10, Calle 5 y 7. Contiguo a la Iglesia.">
-                         </div>
-
-                         <!--Los inputs de latitud y longitud tienen reandoly lo que significa que solo se llenaran cuando el admin toque el mapa-->
-                         <div class="col-md-3">
-                           <label class="small fw-bold">Latitud</label>
-                           <input type="text" id="p_lat" class="form-control form-control-sm bg-white" placeholder="Haga clic en el mapa" readonly required>
-                         </div>
-                         <div class="col-md-3">
-                           <label class="small fw-bold">Longitud</label>
-                           <input type="text" id="p_lon" class="form-control form-control-sm bg-white" placeholder="Haga clic en el mapa" readonly required>
-                         </div>
-
-                         <div class="col-md-1 d-flex align-items-end">
-                           <button type="submit" class="btn btn-primary btn-sm w-100"><i data-lucide="plus"></i></button>
-                            </div>
-                      </form>
-
-                      <!--Lista de las paradas actuales-->
-                      <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
-                        <i data-lucide="list"></i> Paradas del trayecto</h6>
-                      <div id="listaParadasRuta" class="list-group list-group-flush border rounded-3 overflow-y-auto" style="max-height: 200px;">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
   </main>
 
   <div id="footer-container"></div>
@@ -380,8 +405,9 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <!--3: MAIN DE JS-->
-   <script src="js/main.js"></script>
+  <script src="js/main.js"></script>
 
 
 </body>
+
 </html>

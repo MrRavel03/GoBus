@@ -11,11 +11,11 @@ import com.example.basedatos.tablas.Ruta;
 public interface RutaRepositorio extends JpaRepository<Ruta, Long> {
 
      /** Lista de origenes sin repetir, para llenar el select del buscador. */
-    @Query("SELECT DISTINCT r.origen FROM Ruta r WHERE r.origen IS NOT NULL ORDER BY r.origen")
+    @Query("SELECT DISTINCT r.origen FROM Ruta r")
     List<String> obtenerOrigenes();
 
     /** Lista de destinos sin repetir, para llenar el select del buscador. */
-    @Query("SELECT DISTINCT r.destino FROM Ruta r WHERE r.destino IS NOT NULL ORDER BY r.destino")
+    @Query("SELECT DISTINCT r.destino FROM Ruta r")
     List<String> obtenerDestinos();
 
     // Consultas derivadas: Spring Data las arma a partir del nombre del metodo.

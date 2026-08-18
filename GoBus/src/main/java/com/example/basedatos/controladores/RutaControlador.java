@@ -3,7 +3,6 @@ package com.example.basedatos.controladores;
 import com.example.basedatos.tablas.Ruta;
 import com.example.basedatos.repositorios.RutaRepositorio;
 
-import org.apache.tomcat.util.http.parser.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,14 +29,6 @@ public class RutaControlador {
     public List<String> obtenerDestinos() {
         return rutaRepositorio.obtenerDestinos();
     }
-
-
-    /*  Reemplaza a rutas.php
-    //Obtener todas las rutas
-    @GetMapping
-    public List<Ruta> obtenerRutas() {
-        return (List<Ruta>) rutaRepositorio.findAll();
-    }*/
 
     /**
      * Obtener rutas. Si vienen origen y/o destino como parametros, filtra;
@@ -125,9 +116,5 @@ public class RutaControlador {
         rutaRepositorio.deleteById(id);
         return ResponseEntity.ok().build();
     }
-
-
-
-
 
 }

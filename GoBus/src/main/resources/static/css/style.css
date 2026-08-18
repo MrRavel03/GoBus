@@ -387,4 +387,23 @@ html {
 
 #contenedor-rutas {
   scroll-margin-top: 200px;
+#contenedor-rutas {
+  scroll-margin-top: 200px;
+}
+
+/*Popover del comentario del usuario*/
+.popover-body {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popover {
+  max-width: 350px;
+}
+
+/*Para que el usuario sepa que puede hacer clic en el circulo de la parada en la seccion de recorrido y paradas*/
+
+.detail-timeline-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
 }
