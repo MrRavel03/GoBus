@@ -159,8 +159,9 @@
         <div class="modal-body p-4">
           <p class="small text-secondary mb-4">Ayúdanos a mantener la información actualizada.</p>
           <form onsubmit="enviarReporte(event)" id="formReporte">
-            <div class="mb-3">
-              <label class="small fw-bold mb-1">¿Qué incidencia desea reportar?</label>
+
+            <div class="mb-4">
+              <label class="small fw-bold mb-2 d-block">¿Qué incidencia desea reportar?</label>
               <select id="tipoReporte" class="form-select bg-light" required>
                 <option value="" disabled selected>Selecciona una opción</option>
                 <option value="Horario incorrecto">Horario incorrecto</option>
@@ -170,7 +171,22 @@
                 <option value="Otro problema">Otro problema</option>
               </select>
             </div>
-            <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold">Enviar Reporte</button>
+
+            <!--Contenedor del comentario cuando este se despliegue-->
+            <div id="contenedorComentario" class="mb-4" style="display: none;">             
+                  <label class="small fw-bold mb-2 d-block">Detalles adicionales</label>
+                  <textarea id="comentarioReporte" 
+                class="form-control bg-light border-0" 
+                 rows="3" 
+                 placeholder="Cuéntenos un poco más para poder arreglarlo..."></textarea>
+                </div>
+
+                <div class="pt-2">
+              <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold py-2">
+                Enviar Reporte
+              </button>
+            </div>
+
           </form>
         </div>
       </div>

@@ -9,6 +9,10 @@ body {
   background-color: #f8fafc; /* Color pizarra muy claro */
 }
 
+html {
+  overflow-y: scroll;
+}
+
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: #f1f5f9; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -380,3 +384,25 @@ body {
 .fila-usuario{
   animation: fadeIn 0.4s ease forwards;
 }
+
+#contenedor-rutas {
+  scroll-margin-top: 200px;
+}
+
+/*Popover del comentario del usuario*/
+.popover-body {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popover {
+  max-width: 350px;
+}
+
+/*Para que el usuario sepa que puede hacer clic en el circulo de la parada en la seccion de recorrido y paradas*/
+
+.detail-timeline-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+}
+  

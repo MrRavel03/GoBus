@@ -218,7 +218,7 @@ function iniciarSesion() {
 
           Swal.fire({
             title: "¡Bienvenido!",
-            text: "Hola " + usuario.nombre + ", bienvenido a GoBus",
+            text: `Hola ${usuario.nombre}, qué bueno verte en GoBus`,
             icon: "success",
             timer: 2000,
             showConfirmButton: false,
@@ -319,58 +319,478 @@ async function cargarUsuariosRecientes() {
 //RUTAS Y DETALLES
 //Angelica rutas
 
-async function cargarRutasDesdeBackend() {
-  const contenedorRutas = document.getElementById("contenedorRutas");
+// Formatea un numero como colones. Si viene null o undefined muestra 0
+// en vez de tronar con "Cannot read properties of undefined".
+function formatearColones(valor) {
+  const numero = Number(valor);
+  return "₡" + (isNaN(numero) ? 0 : numero).toLocaleString("es-CR");
+}
 
-  if (!contenedorRutas) {
+//BUSCADOR DEL INDEX
+
+// Rellena un <select> con la lista de textos que venga del backend.
+function llenarSelect(elemento, opciones, textoPorDefecto) {
+  elemento.innerHTML = `<option value="">${textoPorDefecto}</option>`;
+
+  opciones.forEach(function (opcion) {
+    const item = document.createElement("option");
+    item.value = opcion;
+    item.textContent = opcion;
+    elemento.appendChild(item);
+  });
+}
+
+// Pide al backend los origenes y destinos que existen en la base
+// y los carga en los dos select del buscador de index.html.
+function cargarOpcionesBusqueda() {
+  const selectOrigen = document.getElementById("select-origen");
+  const selectDestino = document.getElementById("select-destino");
+
+  if (!selectOrigen || !selectDestino) {
     return;
   }
-  fetch("/api/rutas")
+
+  fetch("/api/rutas/origenes")
     .then(function (response) {
       return response.json();
     })
+    .then(function (origenes) {
+      llenarSelect(selectOrigen, origenes, "Origen");
+    })
+    .catch(function (error) {
+      console.error("Error al cargar los origenes:", error);
+      selectOrigen.innerHTML = '<option value="">Origen no disponible</option>';
+    });
+
+  fetch("/api/rutas/destinos")
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (destinos) {
+      llenarSelect(selectDestino, destinos, "Destino");
+    })
+    .catch(function (error) {
+      console.error("Error al cargar los destinos:", error);
+      selectDestino.innerHTML =
+        '<option value="">Destino no disponible</option>';
+    });
+}
+
+// Al enviar el buscador, lleva al usuario a rutas.html con lo que eligio.
+function activarBusqueda() {
+  const formulario = document.getElementById("formulario-busqueda");
+
+  if (!formulario) {
+    return;
+  }
+
+  formulario.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const origen = document.getElementById("select-origen").value;
+    const destino = document.getElementById("select-destino").value;
+
+    const parametros = new URLSearchParams();
+    if (origen) parametros.set("origen", origen);
+    if (destino) parametros.set("destino", destino);
+
+    window.location.href = "rutas.html?" + parametros.toString();
+  });
+}
+
+// Imagenes por defecto segun el origen de la ruta.
+// Si el origen no coincide con ninguna, se usa la imagen "default".
+var IMAGENES_POR_ORIGEN = {
+  "san jose":
+    "https://www.geckoroutes.com/images/wp-uploads/2021/10/Aerial-view-of-Costa-Ricas-San-Jose-city.jpg",
+  alajuela:
+    "https://costarica.org/wp-content/uploads/2014/12/Alajuela-Building1.jpg",
+  heredia:
+    "https://media.licdn.com/dms/image/v2/D4E12AQH8SKQDWor_kg/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1685067618225?e=2147483647&v=beta&t=oeppYclxfvpdzasfmjpxHMexONIh4HOb7n4X5l2lIDk",
+  cartago:
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaE_tmCJP22O6_1VPiT3T0YLbDwt-iOcdeJzvlS2TKlfRoTNDybGjDhqE&s=10",
+  default:
+    "https://img.magnific.com/vector-gratis/ubicacion-pin-ruta-bandera_78370-4270.jpg?semt=ais_hybrid&w=740&q=80",
+};
+
+// Quita tildes y pasa a minusculas para poder comparar "San Jose" con "san jose".
+function normalizarTexto(texto) {
+  return (texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+// Busca en IMAGENES_POR_ORIGEN una clave que este contenida en el origen de la ruta.
+function obtenerImagenPorOrigen(origen) {
+  const origenNormalizado = normalizarTexto(origen);
+
+  for (const clave in IMAGENES_POR_ORIGEN) {
+    if (clave !== "default" && origenNormalizado.includes(clave)) {
+      return IMAGENES_POR_ORIGEN[clave];
+    }
+  }
+  return IMAGENES_POR_ORIGEN["default"];
+}
+
+// Devuelve una copia del arreglo mezclada al azar (Fisher-Yates).
+function mezclarArreglo(arreglo) {
+  const copia = [...arreglo];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+}
+
+// Carga 3 rutas al azar desde el backend y las pinta en index.html
+function cargarRutasDestacadas() {
+  const contenedor = document.getElementById("contenedor-rutas-destacadas");
+
+  if (!contenedor) {
+    return;
+  }
+
+  fetch("/api/rutas")
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("El servidor respondio " + response.status);
+      }
+      return response.json();
+    })
     .then(function (rutas) {
-      contenedorRutas.innerHTML = "";
+      if (!Array.isArray(rutas) || rutas.length === 0) {
+        contenedor.innerHTML = `<p class="text-center text-secondary">No hay rutas destacadas por ahora.</p>`;
+        return;
+      }
 
-      rutas.forEach(function (ruta) {
-        const rutaHTML = `
-          <a href="detalle-ruta.html?id=${ruta.id}" class="route-card p-4">
-            <div class="row align-items-center">
-              <div class="col-8 col-md-9">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <span class="badge-soft-primary small">${ruta.tipo}</span>
-                  <span class="text-secondary small fw-medium">• ${ruta.empresa}</span>
+      const rutasElegidas = mezclarArreglo(rutas).slice(0, 3);
+
+      let html = "";
+
+      rutasElegidas.forEach(function (ruta) {
+        const imagen = obtenerImagenPorOrigen(ruta.origen);
+
+        html += `
+          <div class="col">
+            <a href="detalle-ruta.html?id=${ruta.id}" class="text-decoration-none">
+              <div class="card h-100 card-route border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="position-relative">
+                  <img src="${imagen}" class="card-img-top"
+                    style="height: 220px; object-fit: cover; width: 100%;" alt="${ruta.destino}">
+                  <div class="position-absolute top-0 end-0 m-3">
+                    <span class="badge bg-white text-dark rounded-pill px-3 py-2 shadow-sm fs-6">${formatearColones(ruta.tarifa)}</span>
+                  </div>
                 </div>
-                <div class="route-path">
-                  <div class="route-dot start"></div>
-                  <h6 class="fw-bold text-dark mb-3">${ruta.origen}</h6>
-                  <div class="route-dot end"></div>
-                  <h6 class="fw-bold text-dark mb-0">${ruta.destino}</h6>
+                <div class="card-body p-4">
+                  <h5 class="card-title fw-bold mb-1">${ruta.origen} - ${ruta.destino}</h5>
+                  <p class="card-text text-muted small mb-3">${ruta.empresa}</p>
+                  <div class="d-flex gap-3 small text-secondary">
+                    <span class="d-flex align-items-center gap-1"><i data-lucide="clock" style="width:16px;"></i> ${ruta.frecuencia || "N/D"}</span>
+                    <span class="d-flex align-items-center gap-1"><i data-lucide="map-pin" style="width:16px;"></i> ${ruta.tipo || "Directo"}</span>
+                  </div>
                 </div>
               </div>
-              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
-                <span class="text-secondary small d-flex align-items-center gap-1 mb-2">
-                  <i data-lucide="clock" style="width:14px;"></i> ${ruta.frecuencia}
-                </span>
-                <span class="fs-4 fw-bolder text-dark mb-2">₡${ruta.tarifa.toLocaleString("es-CR")}</span>
-                <div class="btn-round-arrow">
-                  <i data-lucide="chevron-right" style="width: 20px;"></i>
-                </div>
-              </div>
-            </div>
-          </a>
+            </a>
+          </div>
         `;
-
-        contenedorRutas.innerHTML += rutaHTML;
       });
+
+      contenedor.innerHTML = html;
 
       if (typeof lucide !== "undefined") {
         lucide.createIcons();
       }
     })
     .catch(function (error) {
-      console.error("Error al cargar las rutas:", error);
+      console.error("Error al cargar las rutas destacadas:", error);
+      contenedor.innerHTML = `<p class="text-center text-danger">No se pudieron cargar las rutas destacadas.</p>`;
     });
+}
+
+// Guarda todas las rutas descargadas del backend, para filtrar en memoria sin volver a pedirlas
+var todasLasRutas = [];
+
+// Mapeo de provincia -> palabras clave a buscar dentro del texto de "origen"
+var PROVINCIA_POR_ORIGEN = {
+  "p-sanjose": ["san jose"],
+  "p-alajuela": ["alajuela"],
+  "p-cartago": ["cartago"],
+  "p-heredia": ["heredia"],
+  "p-guanacaste": ["guanacaste", "liberia", "nicoya", "santa cruz"],
+  "p-puntarenas": ["puntarenas"],
+  "p-limon": ["limon"]
+};
+
+// Mapeo de checkbox de tipo -> valor real que se guarda en la columna "tipo"
+var TIPO_POR_CHECKBOX = {
+  "ts-urbano": "Urbano",
+  "ts-interurbano": "Interurbano",
+};
+
+
+// Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
+// Estado de la paginacion
+var RUTAS_POR_PAGINA = 3;
+var paginaActual = 1;
+var rutasActualmentefiltradas = [];
+
+function cargarRutasDesdeBackend() {
+  const contenedorRutas = document.getElementById("contenedor-rutas");
+
+  if (!contenedorRutas) {
+    return;
+  }
+
+  // Si venimos del buscador del index, respetamos el filtro de la URL
+  const filtros = new URLSearchParams(window.location.search);
+  const parametros = new URLSearchParams();
+  if (filtros.get("origen")) parametros.set("origen", filtros.get("origen"));
+  if (filtros.get("destino")) parametros.set("destino", filtros.get("destino"));
+
+  const url = parametros.toString()
+    ? "/api/rutas?" + parametros.toString()
+    : "/api/rutas";
+
+  fetch(url)
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("El servidor respondio " + response.status);
+      }
+      return response.json();
+    })
+    .then(function (rutas) {
+      todasLasRutas = Array.isArray(rutas) ? rutas : [];
+      pintarRutas(todasLasRutas);
+      activarFiltros();
+      activarPaginacion();
+    })
+    .catch(function (error) {
+      console.error("Error al cargar las rutas:", error);
+      contenedorRutas.innerHTML = `
+        <div class="text-center text-danger py-5">
+          No se pudieron cargar las rutas. Revisa que el servidor este corriendo.
+        </div>`;
+    });
+}
+
+
+// Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
+function pintarRutas(rutas) {
+  const contenedorRutas = document.getElementById("contenedor-rutas");
+  if (!contenedorRutas) return;
+
+  rutasActualmentefiltradas = Array.isArray(rutas) ? rutas : [];
+
+  if (rutasActualmentefiltradas.length === 0) {
+    contenedorRutas.innerHTML = `
+      <div class="text-center text-secondary py-5">
+        No hay rutas que coincidan con tu busqueda.
+      </div>`;
+    pintarPaginacion();
+    if (typeof lucide !== "undefined") lucide.createIcons();
+    return;
+  }
+
+
+  // Si la pagina actual quedo fuera de rango (ej. tras filtrar), la regresamos a la 1
+   const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
+  if (paginaActual > totalPaginas) paginaActual = 1;
+  if (paginaActual < 1) paginaActual = 1;
+
+    const inicio = (paginaActual - 1) * RUTAS_POR_PAGINA;
+    const fin = inicio + RUTAS_POR_PAGINA;
+    const rutasDeEstaPagina = rutasActualmentefiltradas.slice(inicio, fin);
+
+  let html = "";
+
+  rutasDeEstaPagina.forEach(function (ruta) {
+    html += `
+      <a href="detalle-ruta.html?id=${ruta.id}" class="route-card p-4">
+        <div class="row align-items-center">
+          <div class="col-8 col-md-9">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span class="badge-soft-primary small">${ruta.tipo}</span>
+              <span class="text-secondary small fw-medium">• ${ruta.empresa}</span>
+            </div>
+            <div class="route-path">
+              <div class="route-dot start"></div>
+              <h6 class="fw-bold text-dark mb-3">${ruta.origen}</h6>
+              <div class="route-dot end"></div>
+              <h6 class="fw-bold text-dark mb-0">${ruta.destino}</h6>
+            </div>
+          </div>
+          <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
+            <span class="text-secondary small d-flex align-items-center gap-1 mb-2">
+              <i data-lucide="clock" style="width:14px;"></i> ${ruta.frecuencia}
+            </span>
+            <span class="fs-4 fw-bolder text-dark mb-2">${formatearColones(ruta.tarifa)}</span>
+            <div class="btn-round-arrow">
+              <i data-lucide="chevron-right" style="width: 20px;"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    `;
+  });
+
+  contenedorRutas.innerHTML = html;
+
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+
+  pintarPaginacion();
+}
+
+// Dibuja los numeros de pagina y activa Ant/Sig segun cuantas rutas hay
+function pintarPaginacion() {
+  const contenedorPaginacion = document.querySelector(".pagination");
+  if (!contenedorPaginacion) return;
+
+  const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
+
+  if (totalPaginas <= 1) {
+    contenedorPaginacion.innerHTML = "";
+    return;
+  }
+
+  let html = "";
+
+  html += `
+    <li class="page-item ${paginaActual === 1 ? "disabled" : ""}">
+      <a class="page-link text-secondary border-0 bg-transparent" href="#" data-pagina="ant">Ant</a>
+    </li>`;
+
+  for (let numero = 1; numero <= totalPaginas; numero++) {
+    html += `
+      <li class="page-item ${numero === paginaActual ? "active" : ""}">
+        <a class="page-link ${numero === paginaActual ? "rounded bg-primary border-0" : "text-secondary border-0 bg-transparent"}" href="#" data-pagina="${numero}">${numero}</a>
+      </li>`;
+  }
+
+  html += `
+    <li class="page-item ${paginaActual === totalPaginas ? "disabled" : ""}">
+      <a class="page-link text-secondary border-0 bg-transparent" href="#" data-pagina="sig">Sig</a>
+    </li>`;
+
+  contenedorPaginacion.innerHTML = html;
+}
+
+// Escucha los clics en los links de paginacion (delegado, porque se re-dibujan cada vez)
+function activarPaginacion() {
+  const contenedorPaginacion = document.querySelector(".pagination");
+  if (!contenedorPaginacion) return;
+
+  //Para evitar listeners viejos
+  const nuevoContenedor = contenedorPaginacion.cloneNode(true);
+  contenedorPaginacion.parentNode.replaceChild(nuevoContenedor, contenedorPaginacion);
+
+  nuevoContenedor.addEventListener("click", function (e) {
+    const link = e.target.closest("[data-pagina]");
+    if (!link || link.parentElement.classList.contains('disabled')) return;
+
+    e.preventDefault();
+    const valor = link.getAttribute("data-pagina");
+    const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
+
+     if (valor === "ant") {
+      if (paginaActual > 1) paginaActual--; 
+    } else if (valor === "sig") {
+      if (paginaActual < totalPaginas) paginaActual++;  
+    } else {
+      paginaActual = parseInt(valor, 10);
+    }
+
+    pintarRutas(rutasActualmentefiltradas);
+
+    // Sube la vista al inicio del listado al cambiar de pagina
+    document.getElementById("contenedor-rutas").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+// Revisa el estado de checkboxes + texto de busqueda, filtra en memoria y vuelve a pintar
+function aplicarFiltros() {
+  const provinciasMarcadas = Object.keys(PROVINCIA_POR_ORIGEN)
+    .filter(function (idCheckbox) {
+      const el = document.getElementById(idCheckbox);
+      return el && el.checked;
+    });
+
+  const tiposMarcados = Object.keys(TIPO_POR_CHECKBOX)
+    .filter(function (idCheckbox) {
+      const el = document.getElementById(idCheckbox);
+      return el && el.checked;
+    })
+    .map(function (idCheckbox) {
+      return TIPO_POR_CHECKBOX[idCheckbox];
+    });
+
+  const inputBusqueda = document.getElementById("buscador-texto");
+  const textoBusqueda = normalizarTexto(inputBusqueda ? inputBusqueda.value : "");
+
+  const rutasFiltradas = todasLasRutas.filter(function (ruta) {
+    // Filtro de provincia: si NINGUNA provincia esta marcada, no mostramos nada;
+    // si el origen de la ruta coincide con alguna provincia marcada, pasa.
+    // Despues:
+  const origenNormalizado = normalizarTexto(ruta.origen);
+  const destinoNormalizado = normalizarTexto(ruta.destino);
+  const coincideProvincia = provinciasMarcadas.some(function (idCheckbox) {
+    return PROVINCIA_POR_ORIGEN[idCheckbox].some(function (palabraClave) {
+      return origenNormalizado.includes(palabraClave) || destinoNormalizado.includes(palabraClave);
+    });
+  });
+
+    // Filtro de tipo: si ningun tipo esta marcado, no mostramos nada;
+    // si el tipo de la ruta esta entre los marcados, pasa.
+    const coincideTipo = tiposMarcados.length === 0
+      ? false
+      : tiposMarcados.includes(ruta.tipo);
+
+    // Filtro de texto libre: busca en origen, destino y empresa
+    const coincideTexto = textoBusqueda === "" || [ruta.origen, ruta.destino, ruta.empresa]
+      .some(function (campo) {
+        return normalizarTexto(campo).includes(textoBusqueda);
+      });
+
+    return coincideProvincia && coincideTipo && coincideTexto;
+  });
+
+  pintarRutas(rutasFiltradas);
+}
+
+// Conecta los checkboxes, el buscador y el boton de limpiar a aplicarFiltros()
+function activarFiltros() {
+  Object.keys(PROVINCIA_POR_ORIGEN).forEach(function (idCheckbox) {
+    const el = document.getElementById(idCheckbox);
+    if (el) el.addEventListener("change", aplicarFiltros);
+  });
+
+  Object.keys(TIPO_POR_CHECKBOX).forEach(function (idCheckbox) {
+    const el = document.getElementById(idCheckbox);
+    if (el) el.addEventListener("change", aplicarFiltros);
+  });
+
+  const inputBusqueda = document.getElementById("buscador-texto");
+  if (inputBusqueda) {
+    inputBusqueda.addEventListener("input", aplicarFiltros);
+  }
+
+  const btnLimpiar = document.getElementById("btn-limpiar-filtros");
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener("click", function () {
+      Object.keys(PROVINCIA_POR_ORIGEN).forEach(function (idCheckbox) {
+        const el = document.getElementById(idCheckbox);
+        if (el) el.checked = true;
+      });
+      Object.keys(TIPO_POR_CHECKBOX).forEach(function (idCheckbox) {
+        const el = document.getElementById(idCheckbox);
+        if (el) el.checked = true;
+      });
+      if (inputBusqueda) inputBusqueda.value = "";
+      aplicarFiltros();
+    });
+  }
 }
 
 //Angelica actualizacion recorridos.
@@ -385,6 +805,9 @@ function cargarDetalleRutaDesdeBackend() {
 
   fetch(`/api/rutas/${idRuta}`)
     .then(function (response) {
+      if (!response.ok) {
+        throw new Error("No se encontro la ruta " + idRuta);
+      }
       return response.json();
     })
     .then(function (ruta) {
@@ -459,11 +882,13 @@ function actualizarDetalleRuta(ruta) {
         claseDot = "success";
       }
       htmlParadas += `
-        <div class="detail-timeline-item">
-          <div class="detail-timeline-dot ${claseDot}"></div>
-          <h6 class="fw-bold text-dark mb-1">${parada.nombre}</h6>
-          <p class="small text-secondary mb-0">${parada.descripcion || ""}</p> 
-        </div>`;
+      <div class="detail-timeline-item" 
+      onclick="enfocarParada(${index}, ${parada.latitud}, ${parada.longitud})" 
+      style="cursor: pointer;">
+      <div class="detail-timeline-dot ${claseDot}"></div>
+      <h6 class="fw-bold text-dark mb-1">${parada.nombre}</h6>
+      <p class="small text-secondary mb-0">${parada.descripcion || ''}</p>
+      </div>`;
     });
     recorrido.innerHTML = htmlParadas;
   }
@@ -1020,6 +1445,8 @@ async function guardarParada(e) {
   }
 }
 
+var marcadoresRuta = [];
+
 //FUNCION de la pagina detalle ruta
 function inicializarMapaDetalleRuta(paradas) {
   if (mapaDetalle) {
@@ -1036,12 +1463,31 @@ function inicializarMapaDetalleRuta(paradas) {
     mapaDetalle,
   ); //
 
-  paradas.forEach((p) => {
-    L.marker([p.latitud, p.longitud])
-      .addTo(mapaDetalle)
-      .bindPopup(`<b>${p.nombre}</b><br>Punto de abordaje oficial`);
+  marcadoresRuta = [];
+
+  paradas.forEach((p, index) => {
+    const marcador = L.marker([p.latitud, p.longitud])
+    .addTo(mapaDetalle)
+     .bindPopup(`<b>${p.nombre}</b><br>${p.descripcion || 'Sin descripción'}`);
+     marcadoresRuta[index] = marcador; 
   });
+    
 }
+
+function enfocarParada(index, latitud, longitud) {
+  
+   if (!mapaDetalle) return;
+   mapaDetalle.flyTo([latitud, longitud], 16, {
+    animate: true,
+    duration: 1.5
+   });
+
+   //Abrir el globo de texto de esa parada
+   if (marcadoresRuta[index]) {
+    marcadoresRuta[index].openPopup();
+   }
+  }
+
 
 //FUNCION ELIMINAR PARADA
 async function eliminarParada(idParada, idRuta, nombreRuta) {
@@ -1089,6 +1535,7 @@ async function enviarReporte(e) {
   const datosReporte = {
     tipo: document.getElementById("tipoReporte").value,
     rutaNombre: nombreRuta,
+    comentario: document.getElementById("comentarioReporte").value,
     estado: "Pendiente",
   };
 
@@ -1178,50 +1625,83 @@ async function cargarReportes() {
 }
 
 async function abrirHistorialReportes() {
-  const response = await fetch("http://localhost:8080/api/reportes");
-  const reportes = await response.json();
-  const tablaBody = document.querySelector("#tabla-todos-reportes tbody");
-  tablaBody.innerHTML = "";
+  try {
+    const response = await fetch("http://localhost:8080/api/reportes");
+    const reportes = await response.json();
+    const tablaBody = document.querySelector("#tabla-todos-reportes tbody");
 
-  //Muestra reportes mas recientes primero
-  reportes.reverse().forEach((rep) => {
-    const Pendiente = rep.estado === "Pendiente";
-    const filaClase = Pendiente ? "" : "opacity-50 bg-light";
+    if (!tablaBody) return;
+    tablaBody.innerHTML = "";
 
-    const badgeClass = Pendiente
-      ? "bg-warning text-warning"
-      : "bg-success text-success";
+    //Muestra reportes mas recientes primero
+    [...reportes].reverse().forEach((rep) => {
+      const pendiente = rep.estado === "Pendiente";
+      const filaClase = pendiente ? "" : "opacity-50 bg-light";
+      const badgeClass = pendiente
+        ? "bg-warning text-warning"
+        : "bg-success text-success";
 
-    //Si el reporte tiene fecha desde la base de datos la muestra, si no es asi muestra la fecha actual
-    const fechaReal = rep.fecha
-      ? new Date(rep.fecha).toLocaleDateString()
-      : new Date().toLocaleDateString();
+      //Si el reporte tiene fecha desde la base de datos la muestra, si no es asi muestra la fecha actual
+      const fechaReal = rep.fecha
+        ? new Date(rep.fecha).toLocaleDateString()
+        : new Date().toLocaleDateString();
 
-    tablaBody.innerHTML += `
-    <tr class="${filaClase} align-middle">
-    <td class="small text-muted py-3">${fechaReal}</td>
-    <td class="py-3">
-    <div class="fw-bold text-dark fs-5 mb-2">${rep.tipo}</div>
-    <div class="text-secondary fw-medium">${rep.rutaNombre}</div>
+      //Comentario de reporte
+      const comentario = rep.tipo === "Otro problema" && rep.comentario ? rep.comentario : "";
+
+      
+      tablaBody.innerHTML += `
+  <tr class="${filaClase} align-middle">
+    <td class="small text-muted py-3 ps-4 align-top" style="width: 15%;">
+      ${fechaReal}
+    </td>          
+    <td class="py-3 align-top" style="width: 65%;">
+      <div class="fw-bold text-dark fs-6 mb-1">${rep.tipo}</div>
+      <div class="small text-muted fw-normal mb-1" style="line-height: 1.2;">
+        ${rep.rutaNombre}
+      </div>
+      ${comentario ? `
+        <div class="small text-secondary fst-italic mt-1">
+          <span class="d-inline-block text-truncate align-bottom" style="max-width: 320px;">
+            "${comentario}"
+          </span>
+          ${comentario.length > 60 ? `
+            <a href="javascript:void(0)" 
+               class="text-primary fw-bold text-decoration-none ms-1 small"
+               data-bs-toggle="popover" 
+               data-bs-trigger="focus" 
+               data-bs-placement="bottom" 
+               title="Detalle del reporte" 
+               data-bs-content="${comentario.replace(/"/g, "&quot;")}">
+              Ver más
+            </a>
+          ` : ""}
+        </div>
+      ` : ""}      
     </td>
-    <td class="py-3 text-end pe-4">
-    <button onclick="${Pendiente ? `cambiarEstadoReporte(${rep.id})` : ''}" 
-    class="badge ${badgeClass} bg-opacity-10 border-0 py-2 px-3 rounded-pill"
-    style="${Pendiente ? 'cursor: pointer;' : 'cursor: default;'} font-size: 0.75rem;">
-    ${rep.estado}
-    </button>
+    <td class="py-3 text-end pe-4 align-top" style="width: 20%;">
+      <button onclick="${pendiente ? `cambiarEstadoReporte(${rep.id})` : ""}" 
+              class="badge ${badgeClass} bg-opacity-10 border-0 py-2 px-3 rounded-pill" 
+              style="${pendiente ? "cursor: pointer;" : "cursor: default;"} font-size: 0.8rem;">
+        ${rep.estado}
+      </button>
     </td>
-    </tr>`;
-  });
-        
-  const modal = document.getElementById("modalHistorialReportes");
-  //Evita duplicados de memoria
-  let instancia = bootstrap.Modal.getInstance(modal);
+  </tr>`;
+});
 
-  if (!instancia) {
-    instancia = new bootstrap.Modal(modal);
+const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+const popoverList = [...popoverTriggerList].map(el => new bootstrap.Popover(el));
+
+    const modal = document.getElementById("modalHistorialReportes");
+    //Evita duplicados de memoria
+    let instancia = bootstrap.Modal.getInstance(modal);
+    if (!instancia) {
+      instancia = new bootstrap.Modal(modal);
+    }
+    instancia.show();
+  } catch (error) {
+    console.error("Error al cargar historial:", error);
   }
-  instancia.show();
 }
 
 async function cambiarEstadoReporte(id) {
@@ -1250,6 +1730,28 @@ async function cambiarEstadoReporte(id) {
   }
 }
 
+function configurarVisibilidadReporte() {
+  const selectReporte = document.getElementById('tipoReporte');
+  const divComentario = document.getElementById('contenedorComentario');
+  const txtComentario = document.getElementById('comentarioReporte');
+  
+  if (!selectReporte || !divComentario || !txtComentario) return;
+
+   selectReporte.addEventListener('change', function() {
+    if (this.value === 'Otro problema') {
+       divComentario.style.display = 'block';
+       txtComentario.setAttribute('required', 'true'); 
+       } else {
+         divComentario.style.display = 'none';
+         txtComentario.removeAttribute('required');
+         txtComentario.value = ''; 
+       }
+      });
+    }
+
+
+
+
 //INICIALIACION
 document.addEventListener("DOMContentLoaded", function () {
   //Para que la carga de la pagina sea rapida e eficiente
@@ -1266,6 +1768,13 @@ document.addEventListener("DOMContentLoaded", function () {
     //Cargar datos de rutas
     cargarRutasDesdeBackend(),
     cargarDetalleRutaDesdeBackend(),
+
+    //Buscador del index (selects de origen y destino)
+    cargarOpcionesBusqueda(),
+    activarBusqueda(),
+
+    //Cargar rutas destacadas al azar en index.html
+    cargarRutasDestacadas(),
 
     //Cargar los datos de reportes
     cargarReportes(),
@@ -1292,6 +1801,12 @@ document.addEventListener("DOMContentLoaded", function () {
   if (modalParadas) {
     modalParadas.addEventListener("hidden.bs.modal", function () {
       forzarCierreModal();
+
+      const divC = document.getElementById('contenedorComentario');
+       if (divC) {
+        divC.style.display = 'none';
+       }
+
       if (mapaAdmin) {
         mapaAdmin.remove();
         mapaAdmin = null;
@@ -1305,8 +1820,29 @@ document.addEventListener("DOMContentLoaded", function () {
   if (modalReportes) {
     modalReportes.addEventListener("hidden.bs.modal", function () {
       document.getElementById("formReporte").reset();
+
+      const divComentario = document.getElementById('contenedorComentario');
+      if (divComentario) {
+        divComentario.style.display = 'none';
+      }
+
+      const textoComentario = document.getElementById('comentarioReporte');
+       if (textoComentario) {
+         textoComentario.removeAttribute('required');
+       }
     });
   }
+
+  //Visiblidad del campo de comentarios en el modal de reporte
+  configurarVisibilidadReporte();
+
+  //Para borrar todo rastro de la barra de busqueda
+  window.addEventListener("pageshow", function (event) {
+    const formularioBusqueda = document.getElementById("formulario-busqueda");
+    if (formularioBusqueda) {
+      formularioBusqueda.reset();
+    }
+  });
 
   //Activar la libreria de reloj
   if (

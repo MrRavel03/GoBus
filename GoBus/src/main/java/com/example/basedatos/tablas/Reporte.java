@@ -18,6 +18,7 @@ public class Reporte {
     private String tipo;
     private String rutaNombre;
     private String estado;
+    private String comentario;
 
     //Fecha actual
     @Temporal(TemporalType.TIMESTAMP)
@@ -40,6 +41,8 @@ public class Reporte {
     public Date getFecha() {return fecha;}
     public void setFecha(Date fecha) {this.fecha = fecha;}
 
+    public String getComentario() {return comentario;}
+    public void setComentario(String comentario) {this.comentario = comentario;}
 
 
 }
