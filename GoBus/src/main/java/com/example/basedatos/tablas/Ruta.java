@@ -6,19 +6,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.util.List;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-
 public class Ruta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
+
     private String origen;
     private String destino;
     private String empresa;
@@ -29,63 +29,110 @@ public class Ruta {
     private String telefono;
     private String email;
 
-    public Ruta(){}
-
+    public Ruta() {
+    }
 
     @JsonIgnoreProperties("ruta")
-    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true) //Para borrar una ruta junto con todos sus datos
+    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Horario> horarios;
 
     @JsonIgnoreProperties("ruta")
     @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Parada> paradas;
 
-    @JsonIgnoreProperties("ruta")
-    @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true) 
-    private List<Favorito> favoritos;
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Long getId() {return id;}
-    public void setId(Long id) {this.id = id;}
+    public String getOrigen() {
+        return origen;
+    }
 
-    public String getOrigen() {return origen;}
-    public void setOrigen(String origen) {this.origen = origen;}
+    public void setOrigen(String origen) {
+        this.origen = origen;
+    }
 
-    public String getDestino() {return destino;}
-    public void setDestino(String destino) {this.destino = destino;}
+    public String getDestino() {
+        return destino;
+    }
 
-    public String getEmpresa() {return empresa;}
-    public void setEmpresa(String empresa) {this.empresa = empresa;}
+    public void setDestino(String destino) {
+        this.destino = destino;
+    }
 
+    public String getEmpresa() {
+        return empresa;
+    }
 
-    public String getTipo() {return tipo;}
-    public void setTipo(String tipo) {this.tipo = tipo;}
+    public void setEmpresa(String empresa) {
+        this.empresa = empresa;
+    }
 
-    public Double getTarifa() {return tarifa;}
-    public void setTarifa(Double tarifa) {this.tarifa = tarifa;}
+    public String getTipo() {
+        return tipo;
+    }
 
-    public String getFrecuencia() {return frecuencia;}
-    public void setFrecuencia(String frecuencia) {this.frecuencia = frecuencia;}
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
 
-    public String getEstado() {return estado;}
-    public void setEstado(String estado) {this.estado = estado;}
+    public Double getTarifa() {
+        return tarifa;
+    }
 
-    public String getTelefono() {return telefono;}
-    public void setTelefono(String telefono) {this.telefono = telefono;}
+    public void setTarifa(Double tarifa) {
+        this.tarifa = tarifa;
+    }
 
-    public String getEmail() {return email;}
-    public void setEmail(String email) {this.email = email;}
+    public String getFrecuencia() {
+        return frecuencia;
+    }
 
+    public void setFrecuencia(String frecuencia) {
+        this.frecuencia = frecuencia;
+    }
 
-    public List<Horario> getHorarios() {return horarios;}
-    public void setHorarios(List<Horario> horarios) {this.horarios = horarios;}
+    public String getEstado() {
+        return estado;
+    }
 
-    public List<Parada> getParadas() {return paradas;}
-    public void setParadas(List<Parada> paradas) {this.paradas = paradas;}
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
-    public List<Favorito> getFavoritos() {return favoritos;}
-    public void setFavoritos(List<Favorito> favoritos) {this.favoritos = favoritos;}
+    public String getTelefono() {
+        return telefono;
+    }
 
-    
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<Horario> getHorarios() {
+        return horarios;
+    }
+
+    public void setHorarios(List<Horario> horarios) {
+        this.horarios = horarios;
+    }
+
+    public List<Parada> getParadas() {
+        return paradas;
+    }
+
+    public void setParadas(List<Parada> paradas) {
+        this.paradas = paradas;
+    }
 }
