@@ -1,9 +1,10 @@
 package com.example.basedatos.tablas;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 public class Favorito {
     @Id
@@ -13,12 +14,16 @@ public class Favorito {
 
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
+    @JsonIgnoreProperties("favoritos")
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_ruta", nullable = false)
+    @JsonIgnoreProperties("favoritos")
 
     private Ruta ruta;
+
+    public Favorito(){}
 
     public long getId() {return id;}
     public void setId(long id) {this.id = id;}

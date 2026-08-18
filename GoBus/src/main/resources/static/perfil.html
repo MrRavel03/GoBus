@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil - GoBus</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Librería de Alertas -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="d-flex flex-column min-vh-100 bg-slate-50">
+
+  <!-- Header dinámico -->
+  <div id="header-container"></div>
+
+  <main class="flex-grow-1 container-xl py-4 py-md-5">
+    <div class="row g-4">
+
+      <!-- Panel del usuario (Izquierda) -->
+      <aside class="col-lg-3">
+        <div class="card rounded-xl border shadow-sm overflow-hidden">
+          <div class="card-body text-center border-bottom bg-white">
+            <div id="perfil-avatar"
+              class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center fw-bold fs-3 mb-3"
+              style="width:80px; height:80px;"></div>
+            <h5 class="fw-bold mb-0" id="perfil-nombre"></h5>
+            <p class="small text-secondary mb-0" id="perfil-correo"></p>
+          </div>
+          <div class="list-group list-group-flush p-2" id="perfil-tabs" role="tablist">
+            <a href="#tab-favoritos" class="list-group-item list-group-item-action border-0 rounded fw-medium mb-1 d-flex gap-2 align-items-center active"
+              data-bs-toggle="pill" role="tab">
+              <i data-lucide="heart" style="width:18px;"></i> Rutas Favoritas
+            </a>
+            <a href="#tab-historial" class="list-group-item list-group-item-action border-0 rounded text-secondary fw-medium mb-1 d-flex gap-2 align-items-center"
+              data-bs-toggle="pill" role="tab">
+              <i data-lucide="history" style="width:18px;"></i> Historial de Búsquedas
+            </a>
+            <hr class="my-2 text-muted">
+            <a href="#" id="btn-cerrar-sesion-perfil" class="list-group-item list-group-item-action border-0 rounded text-danger fw-medium d-flex gap-2 align-items-center">
+              <i data-lucide="log-out" style="width:18px;"></i> Cerrar Sesión
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Contenido Principal (Derecha) -->
+      <div class="col-lg-9">
+        <div class="tab-content">
+
+          <!-- Favoritos -->
+          <div class="tab-pane fade show active" id="tab-favoritos" role="tabpanel">
+            <div class="mb-4">
+              <h3 class="fw-bold text-dark mb-1">Rutas Favoritas</h3>
+              <p class="text-secondary small">Acceso rápido a las rutas que marcaste con el corazón.</p>
+            </div>
+
+            <div id="contenedor-perfil-favoritos" class="row row-cols-1 row-cols-lg-2 g-4"></div>
+          </div>
+
+          <!-- Historial -->
+          <div class="tab-pane fade" id="tab-historial" role="tabpanel">
+            <div class="mb-4 d-flex justify-content-between align-items-start">
+              <div>
+                <h3 class="fw-bold text-dark mb-1">Historial de Búsquedas</h3>
+                <p class="text-secondary small">Las últimas rutas que buscaste en GoBus.</p>
+              </div>
+              <button id="btn-limpiar-historial" class="btn btn-light text-secondary btn-sm fw-medium">Limpiar historial</button>
+            </div>
+
+            <div id="contenedor-perfil-historial" class="d-flex flex-column gap-2"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer dinámico -->
+  <div id="footer-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>
