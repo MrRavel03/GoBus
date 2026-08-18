@@ -503,6 +503,27 @@ function cargarRutasDestacadas() {
     });
 }
 
+// Guarda todas las rutas descargadas del backend, para filtrar en memoria sin volver a pedirlas
+let todasLasRutas = [];
+
+// Mapeo de provincia -> palabras clave a buscar dentro del texto de "origen"
+const PROVINCIA_POR_ORIGEN = {
+  "p-sanjose": ["san jose"],
+  "p-alajuela": ["alajuela"],
+  "p-cartago": ["cartago"],
+  "p-heredia": ["heredia"],
+  "p-guanacaste": ["guanacaste", "liberia", "nicoya", "santa cruz"],
+  "p-puntarenas": ["puntarenas"],
+  "p-limon": ["limon"]
+};
+
+// Mapeo de checkbox de tipo -> valor real que se guarda en la columna "tipo"
+const TIPO_POR_CHECKBOX = {
+  "ts-urbano": "Urbano",
+  "ts-interurbano": "Interurbano",
+  "ts-internacional": "Internacional"
+};
+
 function cargarRutasDesdeBackend() {
   const contenedorRutas = document.getElementById("contenedor-rutas");
 
@@ -528,54 +549,10 @@ function cargarRutasDesdeBackend() {
       return response.json();
     })
     .then(function (rutas) {
-      if (!Array.isArray(rutas) || rutas.length === 0) {
-        const huboFiltro = parametros.toString() !== "";
-        contenedorRutas.innerHTML = `
-          <div class="text-center text-secondary py-5">
-            ${huboFiltro
-              ? "No hay rutas que coincidan con tu busqueda."
-              : "No hay rutas registradas todavia."}
-          </div>`;
-        return;
-      }
-
-      let html = "";
-
-      rutas.forEach(function (ruta) {
-        html += `
-          <a href="detalle-ruta.html?id=${ruta.id}" class="route-card p-4">
-            <div class="row align-items-center">
-              <div class="col-8 col-md-9">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <span class="badge-soft-primary small">${ruta.tipo}</span>
-                  <span class="text-secondary small fw-medium">• ${ruta.empresa}</span>
-                </div>
-                <div class="route-path">
-                  <div class="route-dot start"></div>
-                  <h6 class="fw-bold text-dark mb-3">${ruta.origen}</h6>
-                  <div class="route-dot end"></div>
-                  <h6 class="fw-bold text-dark mb-0">${ruta.destino}</h6>
-                </div>
-              </div>
-              <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
-                <span class="text-secondary small d-flex align-items-center gap-1 mb-2">
-                  <i data-lucide="clock" style="width:14px;"></i> ${ruta.frecuencia}
-                </span>
-                <span class="fs-4 fw-bolder text-dark mb-2">${formatearColones(ruta.tarifa)}</span>
-                <div class="btn-round-arrow">
-                  <i data-lucide="chevron-right" style="width: 20px;"></i>
-                </div>
-              </div>
-            </div>
-          </a>
-        `;
-      });
-
-      contenedorRutas.innerHTML = html;
-
-      if (typeof lucide !== "undefined") {
-        lucide.createIcons();
-      }
+      todasLasRutas = Array.isArray(rutas) ? rutas : [];
+      pintarRutas(todasLasRutas);
+      activarFiltros();
+      activarPaginacion();
     })
     .catch(function (error) {
       console.error("Error al cargar las rutas:", error);
@@ -584,6 +561,224 @@ function cargarRutasDesdeBackend() {
           No se pudieron cargar las rutas. Revisa que el servidor este corriendo.
         </div>`;
     });
+}
+
+// Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
+// Estado de la paginacion
+const RUTAS_POR_PAGINA = 3;
+let paginaActual = 1;
+let rutasActualmentefiltradas = [];
+
+// Pinta un arreglo de rutas dado dentro de #contenedor-rutas (ya sea todas o el resultado de un filtro)
+function pintarRutas(rutas) {
+  const contenedorRutas = document.getElementById("contenedor-rutas");
+  if (!contenedorRutas) return;
+
+  rutasActualmentefiltradas = Array.isArray(rutas) ? rutas : [];
+
+  if (rutasActualmentefiltradas.length === 0) {
+    contenedorRutas.innerHTML = `
+      <div class="text-center text-secondary py-5">
+        No hay rutas que coincidan con tu busqueda.
+      </div>`;
+    pintarPaginacion();
+    return;
+  }
+
+  // Si la pagina actual quedo fuera de rango (ej. tras filtrar), la regresamos a la 1
+  const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
+  if (paginaActual > totalPaginas) {
+    paginaActual = 1;
+  }
+
+  const inicio = (paginaActual - 1) * RUTAS_POR_PAGINA;
+  const rutasDeEstaPagina = rutasActualmentefiltradas.slice(inicio, inicio + RUTAS_POR_PAGINA);
+
+  let html = "";
+
+  rutasDeEstaPagina.forEach(function (ruta) {
+    html += `
+      <a href="detalle-ruta.html?id=${ruta.id}" class="route-card p-4">
+        <div class="row align-items-center">
+          <div class="col-8 col-md-9">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span class="badge-soft-primary small">${ruta.tipo}</span>
+              <span class="text-secondary small fw-medium">• ${ruta.empresa}</span>
+            </div>
+            <div class="route-path">
+              <div class="route-dot start"></div>
+              <h6 class="fw-bold text-dark mb-3">${ruta.origen}</h6>
+              <div class="route-dot end"></div>
+              <h6 class="fw-bold text-dark mb-0">${ruta.destino}</h6>
+            </div>
+          </div>
+          <div class="col-4 col-md-3 text-end d-flex flex-column align-items-end justify-content-between h-100">
+            <span class="text-secondary small d-flex align-items-center gap-1 mb-2">
+              <i data-lucide="clock" style="width:14px;"></i> ${ruta.frecuencia}
+            </span>
+            <span class="fs-4 fw-bolder text-dark mb-2">${formatearColones(ruta.tarifa)}</span>
+            <div class="btn-round-arrow">
+              <i data-lucide="chevron-right" style="width: 20px;"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    `;
+  });
+
+  contenedorRutas.innerHTML = html;
+
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+
+  pintarPaginacion();
+}
+
+// Dibuja los numeros de pagina y activa Ant/Sig segun cuantas rutas hay
+function pintarPaginacion() {
+  const contenedorPaginacion = document.querySelector(".pagination");
+  if (!contenedorPaginacion) return;
+
+  const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
+
+  if (totalPaginas <= 1) {
+    contenedorPaginacion.innerHTML = "";
+    return;
+  }
+
+  let html = "";
+
+  html += `
+    <li class="page-item ${paginaActual === 1 ? "disabled" : ""}">
+      <a class="page-link text-secondary border-0 bg-transparent" href="#" data-pagina="ant">Ant</a>
+    </li>`;
+
+  for (let numero = 1; numero <= totalPaginas; numero++) {
+    html += `
+      <li class="page-item ${numero === paginaActual ? "active" : ""}">
+        <a class="page-link ${numero === paginaActual ? "rounded bg-primary border-0" : "text-secondary border-0 bg-transparent"}" href="#" data-pagina="${numero}">${numero}</a>
+      </li>`;
+  }
+
+  html += `
+    <li class="page-item ${paginaActual === totalPaginas ? "disabled" : ""}">
+      <a class="page-link text-secondary border-0 bg-transparent" href="#" data-pagina="sig">Sig</a>
+    </li>`;
+
+  contenedorPaginacion.innerHTML = html;
+}
+
+// Escucha los clics en los links de paginacion (delegado, porque se re-dibujan cada vez)
+function activarPaginacion() {
+  const contenedorPaginacion = document.querySelector(".pagination");
+  if (!contenedorPaginacion) return;
+
+  contenedorPaginacion.addEventListener("click", function (e) {
+    const link = e.target.closest("[data-pagina]");
+    if (!link) return;
+
+    e.preventDefault();
+    const valor = link.getAttribute("data-pagina");
+    const totalPaginas = Math.ceil(rutasActualmentefiltradas.length / RUTAS_POR_PAGINA);
+
+    if (valor === "ant") {
+      if (paginaActual > 1) paginaActual--;
+    } else if (valor === "sig") {
+      if (paginaActual < totalPaginas) paginaActual++;
+    } else {
+      paginaActual = parseInt(valor, 10);
+    }
+
+    pintarRutas(rutasActualmentefiltradas);
+
+    // Sube la vista al inicio del listado al cambiar de pagina
+    document.getElementById("contenedor-rutas").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+// Revisa el estado de checkboxes + texto de busqueda, filtra en memoria y vuelve a pintar
+function aplicarFiltros() {
+  const provinciasMarcadas = Object.keys(PROVINCIA_POR_ORIGEN)
+    .filter(function (idCheckbox) {
+      const el = document.getElementById(idCheckbox);
+      return el && el.checked;
+    });
+
+  const tiposMarcados = Object.keys(TIPO_POR_CHECKBOX)
+    .filter(function (idCheckbox) {
+      const el = document.getElementById(idCheckbox);
+      return el && el.checked;
+    })
+    .map(function (idCheckbox) {
+      return TIPO_POR_CHECKBOX[idCheckbox];
+    });
+
+  const inputBusqueda = document.getElementById("buscador-texto");
+  const textoBusqueda = normalizarTexto(inputBusqueda ? inputBusqueda.value : "");
+
+  const rutasFiltradas = todasLasRutas.filter(function (ruta) {
+    // Filtro de provincia: si NINGUNA provincia esta marcada, no mostramos nada;
+    // si el origen de la ruta coincide con alguna provincia marcada, pasa.
+    // Despues:
+  const origenNormalizado = normalizarTexto(ruta.origen);
+  const destinoNormalizado = normalizarTexto(ruta.destino);
+  const coincideProvincia = provinciasMarcadas.some(function (idCheckbox) {
+    return PROVINCIA_POR_ORIGEN[idCheckbox].some(function (palabraClave) {
+      return origenNormalizado.includes(palabraClave) || destinoNormalizado.includes(palabraClave);
+    });
+  });
+
+    // Filtro de tipo: si ningun tipo esta marcado, no mostramos nada;
+    // si el tipo de la ruta esta entre los marcados, pasa.
+    const coincideTipo = tiposMarcados.length === 0
+      ? false
+      : tiposMarcados.includes(ruta.tipo);
+
+    // Filtro de texto libre: busca en origen, destino y empresa
+    const coincideTexto = textoBusqueda === "" || [ruta.origen, ruta.destino, ruta.empresa]
+      .some(function (campo) {
+        return normalizarTexto(campo).includes(textoBusqueda);
+      });
+
+    return coincideProvincia && coincideTipo && coincideTexto;
+  });
+
+  pintarRutas(rutasFiltradas);
+}
+
+// Conecta los checkboxes, el buscador y el boton de limpiar a aplicarFiltros()
+function activarFiltros() {
+  Object.keys(PROVINCIA_POR_ORIGEN).forEach(function (idCheckbox) {
+    const el = document.getElementById(idCheckbox);
+    if (el) el.addEventListener("change", aplicarFiltros);
+  });
+
+  Object.keys(TIPO_POR_CHECKBOX).forEach(function (idCheckbox) {
+    const el = document.getElementById(idCheckbox);
+    if (el) el.addEventListener("change", aplicarFiltros);
+  });
+
+  const inputBusqueda = document.getElementById("buscador-texto");
+  if (inputBusqueda) {
+    inputBusqueda.addEventListener("input", aplicarFiltros);
+  }
+
+  const btnLimpiar = document.getElementById("btn-limpiar-filtros");
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener("click", function () {
+      Object.keys(PROVINCIA_POR_ORIGEN).forEach(function (idCheckbox) {
+        const el = document.getElementById(idCheckbox);
+        if (el) el.checked = true;
+      });
+      Object.keys(TIPO_POR_CHECKBOX).forEach(function (idCheckbox) {
+        const el = document.getElementById(idCheckbox);
+        if (el) el.checked = true;
+      });
+      if (inputBusqueda) inputBusqueda.value = "";
+      aplicarFiltros();
+    });
+  }
 }
 
 //Angelica actualizacion recorridos. 
