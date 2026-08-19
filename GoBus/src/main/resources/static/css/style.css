@@ -440,12 +440,13 @@ html {
 
 /*Popover del comentario del usuario*/
 .popover-body {
-  max-height: 200px;
+  max-height: 250px;
   overflow-y: auto;
+  white-space: pre-line;
 }
 
 .popover {
-  max-width: 350px;
+  max-width: 380px !important;
 }
 
 /*Para que el usuario sepa que puede hacer clic en el circulo de la parada en la seccion de recorrido y paradas*/
@@ -453,4 +454,6 @@ html {
 .detail-timeline-item:hover {
   background-color: rgba(0, 0, 0, 0.02);
   border-radius: 8px;
+}
+
 }
