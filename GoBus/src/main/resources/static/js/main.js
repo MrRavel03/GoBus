@@ -322,6 +322,9 @@ async function cargarUsuariosRecientes() {
     });
 
     contenedorUsuarios.innerHTML = contenedorVacio;
+
+    document.getElementById('num-usuarios-total').innerText = usuarios.length;
+
   } catch (error) {
     console.error("Error al cargar los usuarios", error);
   }
@@ -1192,7 +1195,8 @@ function actualizarDetalleRuta(ruta) {
   //SECCION 2: Tabla de horarios
   const tablaHorarios = document.getElementById("tabla-horarios-cuerpo");
 
-  if (tablaHorarios && ruta.horarios) {
+  if (tablaHorarios) {
+    if (ruta.horarios && ruta.horarios.length > 0) {
     let horarios = "";
 
     ruta.horarios.forEach((horario) => {
@@ -1205,7 +1209,16 @@ function actualizarDetalleRuta(ruta) {
         </tr>`;
     });
     tablaHorarios.innerHTML = horarios;
+  }else{
+    tablaHorarios.innerHTML = `
+  <tr>
+    <td colspan="4" class="text-center py-4 text-muted bg-light rounded-2">
+      <small>No hay horarios disponibles para esta ruta en este momento.</small>
+    </td>
+  </tr>
+`;
   }
+}
 
   //SECCION 3: Recorrido y paradas
   const recorrido = document.querySelector(".detail-timeline");
@@ -1236,10 +1249,26 @@ function actualizarDetalleRuta(ruta) {
   //SECCION 4: Tarifa y empresa
   // Tarifa principal
   const tarifaPrincipal = document.querySelector("#tarifas h2");
+   const contenedorLegal = document.getElementById("contenedor-legal-tarifa");
 
   if (tarifaPrincipal) {
     tarifaPrincipal.textContent = formatearColones(ruta.tarifa);
   }
+
+   if (contenedorLegal) {
+    contenedorLegal.innerHTML = `
+      <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2 text-secondary">
+          <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+          <span class="small fw-medium">Adulto Mayor (Ley 7935)</span>
+        </div>
+        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2">
+          Gratis
+        </span>
+      </div>
+    `;
+  }
+
   // Información de empresa
   const infoEmpresa = document.querySelector(".col-lg-4 .p-4");
 
@@ -1319,12 +1348,16 @@ async function cargarRutasPanelAdmin() {
 
     tablaAdmin.innerHTML = filasHTML;
 
+    const rutasActivas = rutas.filter(r => r.estado === 'Activa').length;
+    document.getElementById('num-rutas-activas').innerText = rutasActivas;
+
     if (typeof lucide !== "undefined") lucide.createIcons(); //Volver a dibujar los iconos
   } catch (error) {
     console.error("Error al conectar con la API de rutas:", error); //Manejo de errores
     tablaAdmin.innerHTML =
       '<tr><td colspan="7" class="text-danger text-center">Error al cargar datos</td></tr>';
   }
+  
 }
 
 async function guardarRuta(e) {
@@ -1459,6 +1492,13 @@ async function gestionarHorarios(idRuta, nombre) {
   const contenedor = document.getElementById("listaHorariosRuta");
   contenedor.innerHTML = "";
 
+  if (!ruta.horarios || ruta.horarios.length === 0) {
+  contenedor.innerHTML = `
+    <div class="alert alert-secondary text-center my-3" role="alert">
+      No hay horarios disponibles para esta ruta en este momento.
+    </div>`;
+}else{
+
   //Dibujar cada horario en una lista junto con un boton para eliminar
   ruta.horarios.forEach((h) => {
     contenedor.innerHTML += `
@@ -1470,6 +1510,7 @@ async function gestionarHorarios(idRuta, nombre) {
       <button onclick="eliminarHorario(${h.id}, ${idRuta}, '${nombre}')" class="btn btn-sm text-danger border-0">Borrar</button>
       </div>`;
   });
+}
 
   //Abrir el modal solo si no esta abierto
   const modalElemento = document.getElementById("modalHorarios");
@@ -1627,7 +1668,7 @@ async function eliminarHorario(idHorario, idRuta, nombreRuta) {
           showConfirmButton: false,
         });
         gestionarHorarios(idRuta, nombreRuta);
-      }
+      } 
     } catch (error) {
       Swal.fire("Error", "No se pudo conectar con el servidor", "error");
     }
@@ -1655,6 +1696,7 @@ function convertirHorasAMinutos(horaString) {
   //Total de minutos en el dia
   return horas * 60 + minutos;
 }
+
 
 //FUNCIONES DEL MAPA
 var mapaAdmin = null;
@@ -1956,6 +1998,10 @@ async function cargarReportes() {
     <p class="text-secondary mb-0 fs-6">No hay reportes pendientes por revisar</p>
   </div>`;
     }
+
+    const pendientes = reportes.filter(rep => rep.estado === 'Pendiente').length;
+    document.getElementById('num-reportes-pendientes').innerText = pendientes;
+
   } catch (error) {
     console.error("Error al cargar reportes:", error);
     contenedor.innerHTML =
@@ -1970,7 +2016,12 @@ async function abrirHistorialReportes() {
     const tablaBody = document.querySelector("#tabla-todos-reportes tbody");
 
     if (!tablaBody) return;
+
+    // 1. Limpiar popovers anteriores para evitar basura en memoria
+    document.querySelectorAll('.popover').forEach(pop => pop.remove());
     tablaBody.innerHTML = "";
+
+    let filasHTML = "";
 
     //Muestra reportes mas recientes primero
     [...reportes].reverse().forEach((rep) => {
@@ -1989,7 +2040,7 @@ async function abrirHistorialReportes() {
       const comentario = rep.tipo === "Otro problema" && rep.comentario ? rep.comentario : "";
 
       
-      tablaBody.innerHTML += `
+      filasHTML+= `
   <tr class="${filaClase} align-middle">
     <td class="small text-muted py-3 ps-4 align-top" style="width: 15%;">
       ${fechaReal}
@@ -2028,8 +2079,7 @@ async function abrirHistorialReportes() {
   </tr>`;
 });
 
-const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-const popoverList = [...popoverTriggerList].map(el => new bootstrap.Popover(el));
+ tablaBody.innerHTML = filasHTML;
 
     const modal = document.getElementById("modalHistorialReportes");
     //Evita duplicados de memoria
@@ -2038,10 +2088,20 @@ const popoverList = [...popoverTriggerList].map(el => new bootstrap.Popover(el))
       instancia = new bootstrap.Modal(modal);
     }
     instancia.show();
+
+    const popoverTriggerList = tablaBody.querySelectorAll('[data-bs-toggle="popover"]');
+    [...popoverTriggerList].forEach(el => {
+      new bootstrap.Popover(el, {
+        container: modal,
+        sanitize: false
+      });
+    });
+
   } catch (error) {
     console.error("Error al cargar historial:", error);
   }
 }
+
 
 async function cambiarEstadoReporte(id) {
   try {
@@ -2088,7 +2148,18 @@ function configurarVisibilidadReporte() {
       });
     }
 
-
+    async function actualizarContadorParadas() {
+      try{
+       const res = await fetch("/api/paradas");
+       const paradas = await res.json();
+       const elemento = document.getElementById("num-paradas-total");
+       if (elemento && Array.isArray(paradas)) {
+              elemento.textContent = paradas.length;
+       }
+      }catch(error){
+        console.error("Error al contar paradas:", error);
+      }
+    }
 
 
 //INICIALIACION
@@ -2097,29 +2168,23 @@ document.addEventListener("DOMContentLoaded", function () {
   Promise.all([
     //Cargar estructura visual
     cargarPlantillas(),
-
     //Cargar usuarios recientes en el panel de admin
     cargarUsuariosRecientes(),
-
     //Llenado de tabla para admin
     cargarRutasPanelAdmin(),
-
     //Cargar datos de rutas
     cargarRutasDesdeBackend(),
     cargarDetalleRutaDesdeBackend(),
-
     //Cargar los favoritos del usuario logueado, para pintar los corazones
     cargarFavoritosDelUsuario(),
-
     //Buscador del index (selects de origen y destino)
     cargarOpcionesBusqueda(),
     activarBusqueda(),
-
     //Cargar rutas destacadas al azar en index.html
     cargarRutasDestacadas(),
-
     //Cargar los datos de reportes
     cargarReportes(),
+    actualizarContadorParadas()
   ]).then(() => {
     console.log("Datos dinamicos cargados");
   });
